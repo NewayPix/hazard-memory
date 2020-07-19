@@ -14,6 +14,12 @@ all: $(OBJS)
 %.o: %.cpp
 	$(CC) -c $(CFLAGS) $< -o $@
 
+# running examples easily
+FORCE:
+examples/%: examples/%.cpp FORCE
+	$(CC) $< $(CFLAGS) $(LFLAGS) -o $(<:%.cpp=%.bin)
+	./$(<:%.cpp=%.bin)
+
 run: all
 	./$(BIN_NAME)
 
