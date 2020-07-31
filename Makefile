@@ -1,6 +1,6 @@
 CC = g++
 INCLUDES = $(shell pkg-config --cflags sdl2)
-CFLAGS = -w $(INCLUDES)
+CFLAGS = -w $(INCLUDES) -g
 LFLAGS = -lSDL2
 SRC_DIR = src
 SRCS = $(wildcard $(SRC_DIR)/*.cpp)
