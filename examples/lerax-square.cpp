@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <SDL2/SDL.h>
 #include <iostream>
+#include <cmath>
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
@@ -13,6 +14,9 @@ struct KeyboardState {
     bool down;
     bool velocity_up;
     bool velocity_down;
+    bool diagonal() {
+        return (up && left) || (up && right) || (down && left) || (down && right);
+    }
 };
 
 struct Player {
@@ -34,6 +38,7 @@ private:
     struct Player player = {SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2};
 
     const char *title = "Square Moving";
+    const float sqrt2 = sqrt(2);
 
     bool running = true;
 
@@ -103,17 +108,22 @@ private:
             keyboard.velocity_down = false;
         }
 
+        int local_velocity = velocity;
+        if (keyboard.diagonal()) {
+            local_velocity /= sqrt2;
+        }
+
         if (keyboard.left && !keyboard.right) {
-            player.x += - velocity * dt;
+            player.x += - local_velocity * dt;
         }
         if (keyboard.right && !keyboard.left) {
-            player.x += + velocity * dt;
+            player.x += + local_velocity * dt;
         }
         if (keyboard.down && !keyboard.up) {
-            player.y += + velocity * dt;
+            player.y += + local_velocity * dt;
         }
         if (keyboard.up && !keyboard.down) {
-            player.y += - velocity * dt;
+            player.y += - local_velocity * dt;
         }
 
         if (player.x < 0) {
