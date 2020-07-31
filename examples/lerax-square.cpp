@@ -116,6 +116,19 @@ private:
             player.y += - velocity * dt;
         }
 
+        if (player.x < 0) {
+            player.x = 0;
+        }
+        if (player.y < 0) {
+            player.y = 0;
+        }
+        if (player.x + block_size > SCREEN_WIDTH) {
+            player.x = SCREEN_WIDTH - block_size;
+        }
+        if (player.y + block_size > SCREEN_HEIGHT) {
+            player.y = SCREEN_HEIGHT - block_size;
+        }
+
         playerRect.x = round(player.x);
         playerRect.y = round(player.y);
     }
