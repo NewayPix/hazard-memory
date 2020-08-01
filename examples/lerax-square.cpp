@@ -57,7 +57,7 @@ struct KeyboardState {
 struct Player {
     float x;
     float y;
-    const int size = 50;
+    int size = 50;
     SDL_Rect rect = {0, 0, size, size};
     float velocity = 300;
 
