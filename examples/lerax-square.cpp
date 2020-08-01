@@ -58,8 +58,7 @@ private:
     SDL_Renderer *renderer = NULL;
 
     // player
-    struct Player player = {SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2};
-
+    struct Player player;
     const char *title = "Square Moving";
 
     bool running = true;
@@ -165,6 +164,10 @@ private:
 public:
     Game() {
         std::cout << ":: Game initialization!" << std::endl;
+        // player position initialization
+        player.x = SCREEN_WIDTH / 2;
+        player.y = SCREEN_HEIGHT / 2;
+
         //Initialize SDL
         if(SDL_Init(SDL_INIT_VIDEO) < 0) {
             throw std::string("SDL could not initialize: ") + SDL_GetError();
