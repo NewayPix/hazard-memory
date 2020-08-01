@@ -38,10 +38,14 @@ struct KeyboardState {
 struct Player {
     float x;
     float y;
+    const int size = 50;
+    SDL_Rect rect = {0, 0, size, size};
+    float velocity = 300;
 
-    void move(float angle, float ds) {
-        x += cos(- angle * (M_PI / 180)) * ds;
-        y += sin(- angle * (M_PI / 180)) * ds;
+
+    void move(float angle, float dt) {
+        x += cos(- angle * (M_PI / 180)) * velocity * dt;
+        y += sin(- angle * (M_PI / 180)) * velocity * dt;
     }
 };
 
@@ -54,18 +58,13 @@ private:
     SDL_Renderer *renderer = NULL;
 
     // player
-    const int block_size = 50;
-    SDL_Rect playerRect = {0, 0, block_size, block_size};
     struct Player player = {SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2};
 
     const char *title = "Square Moving";
-    const float sqrt2 = sqrt(2);
 
     bool running = true;
 
     struct KeyboardState keyboard;
-
-    float velocity = 150;
 
     void event(SDL_Event *e) {
         while (SDL_PollEvent(e)) {
@@ -120,17 +119,17 @@ private:
 
     void update(float dt) {
         if (keyboard.velocity_up) {
-            velocity += 50;
+            player.velocity += 50;
             keyboard.velocity_up = false;
         }
         if (keyboard.velocity_down) {
-            velocity -= 50;
-            if (velocity <= 50) velocity = 50;
+            player.velocity -= 50;
+            if (player.velocity <= 50) player.velocity = 50;
             keyboard.velocity_down = false;
         }
 
         if (keyboard.moving() && keyboard.valid_move()) {
-            player.move(keyboard.angle(), velocity * dt);
+            player.move(keyboard.angle(), dt);
         }
 
         if (player.x < 0) {
@@ -139,15 +138,15 @@ private:
         if (player.y < 0) {
             player.y = 0;
         }
-        if (player.x + block_size > SCREEN_WIDTH) {
-            player.x = SCREEN_WIDTH - block_size;
+        if (player.x + player.size > SCREEN_WIDTH) {
+            player.x = SCREEN_WIDTH - player.size;
         }
-        if (player.y + block_size > SCREEN_HEIGHT) {
-            player.y = SCREEN_HEIGHT - block_size;
+        if (player.y + player.size > SCREEN_HEIGHT) {
+            player.y = SCREEN_HEIGHT - player.size;
         }
 
-        playerRect.x = round(player.x);
-        playerRect.y = round(player.y);
+        player.rect.x = round(player.x);
+        player.rect.y = round(player.y);
     }
 
     void render() {
@@ -157,7 +156,7 @@ private:
 
         // player
         SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
-        SDL_RenderFillRect(renderer, &playerRect);
+        SDL_RenderFillRect(renderer, &player.rect);
 
         // render everything
         SDL_RenderPresent(renderer);
