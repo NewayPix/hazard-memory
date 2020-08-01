@@ -15,14 +15,31 @@ struct KeyboardState {
     bool velocity_up;
     bool velocity_down;
 
+    bool valid_move() {
+        return !((up && down) || (left && right));
+    }
+};
+
+struct Player {
+    float x;
+    float y;
+    float d_x; /* direction x: 1 = right; -1 = left */
+    float d_y; /* direction y: 1 = up; -1 = down */
+    int size = 50;
+    SDL_Rect rect = {0, 0, size, size};
+    float velocity = 300;
+
+    void set_direction(struct KeyboardState *k) {
+        d_x = k->right? 1: k->left? -1: 0;
+        d_y = k->up? 1: k->down? -1: 0;
+    }
+
     float cos_direction() {
-        int u_x = 1;
-        int u_y = 0;
-        int v_x = right? 1: left? -1: 0;
-        int v_y = up? 1: down? -1: 0;
-        int dot_u_v = (u_x *  v_x) + (u_y * v_y);
+        float u_x = 1;
+        float u_y = 0;
+        float dot_u_v = (u_x *  d_x) + (u_y * d_y);
         float u_norm = sqrt(u_x * u_x + u_y * u_y);
-        float v_norm = sqrt(v_x * v_x + v_y * v_y);
+        float v_norm = sqrt(d_x * d_x + d_y * d_y);
 
         return dot_u_v / (u_norm * v_norm);
     }
@@ -30,48 +47,17 @@ struct KeyboardState {
     float sin_direction() {
         float cos = cos_direction();
         float sin = sqrt(1 - cos*cos);
-        return down? -sin: sin;
-    }
-
-    float angle() {
-        if (up && right)        return 45;
-        else if (up && left)    return 135;
-        else if (down && left)  return 235;
-        else if (down && right) return 315;
-        else if (right)         return 0;
-        else if (up)            return 90;
-        else if (left)          return 180;
-        else if (down)          return 270;
-        throw std::string("KeyboardState.angle() needs at least one direction available");
-    }
-
-    bool valid_move() {
-        return !((up && down) || (left && right));
+        return -d_y * sin;
     }
 
     bool moving() {
-        return up || down || left || right;
-    }
-};
-
-struct Player {
-    float x;
-    float y;
-    int size = 50;
-    SDL_Rect rect = {0, 0, size, size};
-    float velocity = 300;
-
-
-    void move(float angle, float dt) {
-        move(cos(angle * (M_PI / 180)),
-             sin(angle * (M_PI / 180)),
-             dt);
+        return d_x || d_y;
     }
 
-    void move(float cos, float sin, float dt) {
+    void move(float dt) {
         // std::cout << "cos: " << cos << " sin: " << sin << std::endl;
-        x += cos * velocity * dt;
-        y += -sin * velocity * dt;
+        x += cos_direction() * velocity * dt;
+        y += sin_direction() * velocity * dt;
     }
 };
 
@@ -153,9 +139,11 @@ private:
             keyboard.velocity_down = false;
         }
 
-        if (keyboard.moving() && keyboard.valid_move()) {
-            //player.move(keyboard.angle(), dt);
-            player.move(keyboard.cos_direction(), keyboard.sin_direction(), dt);
+        if (keyboard.valid_move()) {
+            player.set_direction(&keyboard);
+            if (player.moving()) {
+                player.move(dt);
+            }
         }
 
         if (player.x < 0) {
