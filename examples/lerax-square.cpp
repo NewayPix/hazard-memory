@@ -16,7 +16,7 @@ struct KeyboardState {
     bool velocity_down;
 
     bool valid_move() {
-        return !((up && down) || (left && right)) && (up || down || left || right);
+        return (up || down || left || right) && !((up && down) || (left && right));
     }
 };
 
