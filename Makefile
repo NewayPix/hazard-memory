@@ -1,9 +1,11 @@
 CC = g++
-INCLUDES = $(shell pkg-config --cflags sdl2)
+SRC_DIR = src
+INCLUDES = $(shell pkg-config --cflags sdl2) -I $(SRC_DIR)
 CFLAGS = -w $(INCLUDES) -g
 LFLAGS = -lSDL2 -lm
-SRC_DIR = src
 SRCS = $(wildcard $(SRC_DIR)/*.cpp)
+TESTS = $(wildcard tests/*.cpp)
+TESTS_OBJS = $(TESTS:%.cpp=%.bin)
 OBJS = $(SRCS:%.cpp=%.o)
 BIN_NAME = hazard-memory.bin
 
@@ -19,6 +21,14 @@ FORCE:
 examples/%.cpp: FORCE
 	$(CC) $@ $(CFLAGS) $(LFLAGS) -o $(@:%.cpp=%.bin)
 	./$(@:%.cpp=%.bin)
+
+tests: $(TESTS_OBJS)
+
+tests/%.bin: tests/%.cpp
+	@$(CC) $(LFLAGS) $(CFLAGS) $< -o $@
+	@./$@
+	@rm -f $@
+	@echo -- $< [ok]
 
 run: all
 	./$(BIN_NAME)
