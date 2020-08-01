@@ -14,14 +14,35 @@ struct KeyboardState {
     bool down;
     bool velocity_up;
     bool velocity_down;
-    bool diagonal() {
-        return (up && left) || (up && right) || (down && left) || (down && right);
+    float angle() {
+        if (up && right)        return 45;
+        else if (up && left)    return 135;
+        else if (down && left)  return 235;
+        else if (down && right) return 315;
+        else if (right)         return 0;
+        else if (up)            return 90;
+        else if (left)          return 180;
+        else if (down)          return 270;
+        throw std::string("KeyboardState.angle() needs at least one direction available");
+    }
+
+    bool valid_move() {
+        return !((up && down) || (left && right));
+    }
+
+    bool moving() {
+        return up || down || left || right;
     }
 };
 
 struct Player {
     float x;
     float y;
+
+    void move(float angle, float ds) {
+        x += cos(- angle * (M_PI / 180)) * ds;
+        y += sin(- angle * (M_PI / 180)) * ds;
+    }
 };
 
 class Game {
@@ -108,22 +129,8 @@ private:
             keyboard.velocity_down = false;
         }
 
-        int local_velocity = velocity;
-        if (keyboard.diagonal()) {
-            local_velocity /= sqrt2;
-        }
-
-        if (keyboard.left && !keyboard.right) {
-            player.x += - local_velocity * dt;
-        }
-        if (keyboard.right && !keyboard.left) {
-            player.x += + local_velocity * dt;
-        }
-        if (keyboard.down && !keyboard.up) {
-            player.y += + local_velocity * dt;
-        }
-        if (keyboard.up && !keyboard.down) {
-            player.y += - local_velocity * dt;
+        if (keyboard.moving() && keyboard.valid_move()) {
+            player.move(keyboard.angle(), velocity * dt);
         }
 
         if (player.x < 0) {
