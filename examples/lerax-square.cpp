@@ -1,8 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <SDL2/SDL.h>
 #include <iostream>
 #include <cmath>
+#include <string>
+
+#include <SDL2/SDL.h>
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
@@ -163,16 +163,11 @@ private:
     }
 
 public:
-    // Initialization flag
-    bool success = true;
-
-
     Game() {
         std::cout << ":: Game initialization!" << std::endl;
         //Initialize SDL
         if(SDL_Init(SDL_INIT_VIDEO) < 0) {
-            printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
-            success = false;
+            throw std::string("SDL could not initialize: ") + SDL_GetError();
         }
         else {
             //Create window
@@ -183,15 +178,12 @@ public:
                                       SCREEN_HEIGHT,
                                       SDL_WINDOW_SHOWN);
             if(window == NULL) {
-                printf("Window could not be created! SDL_Error: %s\n",
-                       SDL_GetError() );
-                success = false;
+                throw std::string("window could not be created: ") + SDL_GetError();
             }
             else {
                 renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
                 if (!renderer) {
-                    printf("Renderer could not be created! SDL_Error: %s\n", SDL_GetError());
-                    success = false;
+                    throw std::string("renderer could not be created: ") + SDL_GetError();
                 }
 
             }
@@ -226,11 +218,14 @@ public:
 
 
 int main(void) {
-    Game *g = new Game();
-    int error = g->success? 0: 1;
-    if (!error) {
+    try {
+        Game *g = new Game();
         g->run();
+        delete g;
+    } catch (std::string s) {
+        std::cerr << "[error] " << s << std::endl;
+        return 1;
     }
-    delete g;
-    return error;
+
+    return 0;
 }
