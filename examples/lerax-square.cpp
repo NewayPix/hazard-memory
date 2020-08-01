@@ -200,13 +200,24 @@ public:
         return (SDL_GetTicks() - clock) / 1000.0f;
     }
 
+    void debug() {
+        cout << "Player position: " << string(player.position) << endl;
+    }
+
     void run() {
         SDL_Event e;
+        float debugTime = 0;
         do {
             Uint32 clock = SDL_GetTicks();
             event(&e);
             render();
-            update(dt(clock));
+            float dt = this->dt(clock);
+            update(dt);
+            debugTime += dt;
+            if (debugTime > 1) {
+                debug();
+                debugTime = 0;
+            }
         } while(running);
     }
 };
