@@ -51,7 +51,6 @@ struct Player {
     }
 
     void move(float dt) {
-        // std::cout << "cos: " << cos << " sin: " << sin << std::endl;
         x += cos_direction() * velocity * dt;
         y += sin_direction() * velocity * dt;
     }
@@ -59,17 +58,10 @@ struct Player {
 
 class Game {
 private:
-    //The window we'll be rendering to
     SDL_Window *window = NULL;
-
-    // Renderer object
     SDL_Renderer *renderer = NULL;
-
-    // player
     const char *title = "Square Moving";
-
     bool running = true;
-
     struct Player player = {};
     struct KeyboardState keyboard = {};
 
@@ -171,11 +163,9 @@ private:
 public:
     Game() {
         std::cout << ":: Game initialization!" << std::endl;
-        // player position initialization
         player.x = SCREEN_WIDTH / 2;
         player.y = SCREEN_HEIGHT / 2;
 
-        //Initialize SDL
         if(SDL_Init(SDL_INIT_VIDEO) < 0) {
             throw std::string("SDL could not initialize: ") + SDL_GetError();
         }
