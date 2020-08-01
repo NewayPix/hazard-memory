@@ -7,6 +7,8 @@
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
 
+using namespace std;
+
 struct KeyboardState {
     bool up;
     bool left;
@@ -162,15 +164,14 @@ private:
 
 public:
     Game() {
-        std::cout << ":: Game initialization!" << std::endl;
+        cout << ":: Game initialization!" << endl;
         player.x = SCREEN_WIDTH / 2;
         player.y = SCREEN_HEIGHT / 2;
 
         if(SDL_Init(SDL_INIT_VIDEO) < 0) {
-            throw std::string("SDL could not initialize: ") + SDL_GetError();
+            throw string("SDL could not initialize: ") + SDL_GetError();
         }
         else {
-            //Create window
             window = SDL_CreateWindow(title,
                                       SDL_WINDOWPOS_UNDEFINED,
                                       SDL_WINDOWPOS_UNDEFINED,
@@ -178,12 +179,12 @@ public:
                                       SCREEN_HEIGHT,
                                       SDL_WINDOW_SHOWN);
             if(window == NULL) {
-                throw std::string("window could not be created: ") + SDL_GetError();
+                throw string("window could not be created: ") + SDL_GetError();
             }
             else {
                 renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
                 if (!renderer) {
-                    throw std::string("renderer could not be created: ") + SDL_GetError();
+                    throw string("renderer could not be created: ") + SDL_GetError();
                 }
 
             }
@@ -191,7 +192,7 @@ public:
     }
 
     ~Game() {
-        std::cout << ":: Game being destroyed!" << std::endl;
+        cout << ":: Game being destroyed!" << endl;
         SDL_DestroyRenderer(renderer);
         renderer = NULL;
 
@@ -219,10 +220,10 @@ public:
 
 int main(void) {
     try {
-    } catch (std::string s) {
-        std::cerr << "[error] " << s << std::endl;
         Game game;
         game.run();
+    } catch (string s) {
+        cerr << "[error] " << s << endl;
         return 1;
     }
 
