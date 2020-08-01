@@ -133,14 +133,12 @@ private:
 
         if (player.x < 0) {
             player.x = 0;
+        } else if (player.x + player.size > SCREEN_WIDTH) {
+            player.x = SCREEN_WIDTH - player.size;
         }
         if (player.y < 0) {
             player.y = 0;
-        }
-        if (player.x + player.size > SCREEN_WIDTH) {
-            player.x = SCREEN_WIDTH - player.size;
-        }
-        if (player.y + player.size > SCREEN_HEIGHT) {
+        } else if (player.y + player.size > SCREEN_HEIGHT) {
             player.y = SCREEN_HEIGHT - player.size;
         }
 
