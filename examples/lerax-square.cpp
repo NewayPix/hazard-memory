@@ -219,11 +219,10 @@ public:
 
 int main(void) {
     try {
-        Game *g = new Game();
-        g->run();
-        delete g;
     } catch (std::string s) {
         std::cerr << "[error] " << s << std::endl;
+        Game game;
+        game.run();
         return 1;
     }
 
