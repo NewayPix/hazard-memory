@@ -66,12 +66,12 @@ private:
     SDL_Renderer *renderer = NULL;
 
     // player
-    struct Player player;
     const char *title = "Square Moving";
 
     bool running = true;
 
-    struct KeyboardState keyboard;
+    struct Player player = {};
+    struct KeyboardState keyboard = {};
 
     void event(SDL_Event *e) {
         while (SDL_PollEvent(e)) {
