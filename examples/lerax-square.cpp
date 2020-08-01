@@ -14,6 +14,25 @@ struct KeyboardState {
     bool down;
     bool velocity_up;
     bool velocity_down;
+
+    float cos_direction() {
+        int u_x = 1;
+        int u_y = 0;
+        int v_x = right? 1: left? -1: 0;
+        int v_y = up? 1: down? -1: 0;
+        int dot_u_v = (u_x *  v_x) + (u_y * v_y);
+        float u_norm = sqrt(u_x * u_x + u_y * u_y);
+        float v_norm = sqrt(v_x * v_x + v_y * v_y);
+
+        return dot_u_v / (u_norm * v_norm);
+    }
+
+    float sin_direction() {
+        float cos = cos_direction();
+        float sin = sqrt(1 - cos*cos);
+        return down? -sin: sin;
+    }
+
     float angle() {
         if (up && right)        return 45;
         else if (up && left)    return 135;
@@ -44,8 +63,15 @@ struct Player {
 
 
     void move(float angle, float dt) {
-        x += cos(- angle * (M_PI / 180)) * velocity * dt;
-        y += sin(- angle * (M_PI / 180)) * velocity * dt;
+        move(cos(angle * (M_PI / 180)),
+             sin(angle * (M_PI / 180)),
+             dt);
+    }
+
+    void move(float cos, float sin, float dt) {
+        // std::cout << "cos: " << cos << " sin: " << sin << std::endl;
+        x += cos * velocity * dt;
+        y += -sin * velocity * dt;
     }
 };
 
@@ -128,7 +154,8 @@ private:
         }
 
         if (keyboard.moving() && keyboard.valid_move()) {
-            player.move(keyboard.angle(), dt);
+            //player.move(keyboard.angle(), dt);
+            player.move(keyboard.cos_direction(), keyboard.sin_direction(), dt);
         }
 
         if (player.x < 0) {
