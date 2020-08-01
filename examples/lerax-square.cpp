@@ -16,7 +16,7 @@ struct KeyboardState {
     bool velocity_down;
 
     bool valid_move() {
-        return !((up && down) || (left && right));
+        return !((up && down) || (left && right)) && (up || down || left || right);
     }
 };
 
@@ -48,10 +48,6 @@ struct Player {
         float cos = cos_direction();
         float sin = sqrt(1 - cos*cos);
         return -d_y * sin;
-    }
-
-    bool moving() {
-        return d_x || d_y;
     }
 
     void move(float dt) {
@@ -141,9 +137,7 @@ private:
 
         if (keyboard.valid_move()) {
             player.set_direction(&keyboard);
-            if (player.moving()) {
-                player.move(dt);
-            }
+            player.move(dt);
         }
 
         if (player.x < 0) {
