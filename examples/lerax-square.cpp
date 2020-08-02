@@ -87,10 +87,11 @@ private:
     SDL_Renderer *renderer = NULL;
     const char *title = "Square Moving";
     bool running = true;
-    struct Player player;
+    struct Player player = {};
     struct KeyboardState keyboard = {};
     std::deque<SDL_Rect> squares;
     unsigned int queue_max = 30;
+    unsigned long frames = 0;
 
     void event(SDL_Event *e) {
         while (SDL_PollEvent(e)) {
@@ -264,29 +265,38 @@ public:
         SDL_Quit();
     }
 
-    float dt(Uint32 clock) {
-        return (SDL_GetTicks() - clock) / 1000.0f;
+    float dt() {
+        static Uint32 clock = SDL_GetTicks();
+        float delta = (SDL_GetTicks() - clock) / 1000.0f;
+        clock = SDL_GetTicks();
+        return delta;
     }
 
-    void debug() {
-        cout << "Player position: " << string(player.position) << endl;
+    void debug(float dt) {
+        static float debugTime = 0;
+        if (debugTime > 1) {
+            static unsigned long lastFrames = frames;
+            cout << "--- DEBUG ---" << endl;
+            cout << "Player position: \t" << string(player.position) << endl;
+            cout << "Player velocity: \t" << string(player.velocity) << endl;
+            cout << "            FPS: \t" << frames - lastFrames << endl;
+            cout << endl;
+            lastFrames = frames;
+            debugTime = 0;
+        }
+        debugTime += dt;
+
     }
 
     void run() {
         SDL_Event e;
-        Uint32 clock = 0;
-        float dt = 0, debugTime = 0;
         do {
-            dt = this->dt(clock);
-            clock = SDL_GetTicks();
+            float dt = this->dt();
             event(&e);
-            render();
             update(dt);
-            debugTime += dt;
-            if (debugTime > 1) {
-                debug();
-                debugTime = 0;
-            }
+            debug(dt);
+            render();
+            frames++;
         } while(running);
     }
 };
@@ -296,8 +306,8 @@ int main(void) {
     try {
         Game game;
         game.run();
-    } catch (string s) {
-        cerr << "[error] " << s << endl;
+    } catch (string e) {
+        cerr << "[error] " << e << endl;
         return 1;
     }
 
