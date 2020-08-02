@@ -196,11 +196,11 @@ private:
         if (interval <= 0) {
             interval = 0.01;
             if (squares.size() > queue_max) {
-                squares.pop_back();
+                squares.pop_front();
             } else {
                 SDL_Rect rect = {player.rect.x, player.rect.y,
                                  player.size, player.size};
-                squares.push_front(rect);
+                squares.push_back(rect);
             }
         }
 
@@ -216,7 +216,7 @@ private:
         int size = squares.size();
         for(int i = 0; i < size; ++i) {
             int factor = round(255 * ((float) (i + 1) / size));
-            SDL_SetRenderDrawColor(renderer, 0, factor, factor, factor);
+            SDL_SetRenderDrawColor(renderer, 0, factor, 255, factor);
             SDL_RenderFillRect(renderer, &squares[i]);
         }
 
