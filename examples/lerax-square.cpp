@@ -231,27 +231,27 @@ public:
         player.position.x = SCREEN_WIDTH / 2;
         player.position.y = SCREEN_HEIGHT - player.size;
 
-        if(SDL_Init(SDL_INIT_VIDEO) < 0) {
+        if (SDL_Init(SDL_INIT_VIDEO) < 0) {
             throw string("SDL could not initialize: ") + SDL_GetError();
         }
-        else {
-            window = SDL_CreateWindow(title,
-                                      SDL_WINDOWPOS_UNDEFINED,
-                                      SDL_WINDOWPOS_UNDEFINED,
-                                      SCREEN_WIDTH,
-                                      SCREEN_HEIGHT,
-                                      SDL_WINDOW_SHOWN);
-            if(window == NULL) {
-                throw string("window could not be created: ") + SDL_GetError();
-            }
-            else {
-                renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-                if (!renderer) {
-                    throw string("renderer could not be created: ") + SDL_GetError();
-                }
 
-            }
+        window = SDL_CreateWindow(title,
+                                  SDL_WINDOWPOS_UNDEFINED,
+                                  SDL_WINDOWPOS_UNDEFINED,
+                                  SCREEN_WIDTH,
+                                  SCREEN_HEIGHT,
+                                  SDL_WINDOW_SHOWN);
+
+        if (window == NULL) {
+            throw string("window could not be created: ") + SDL_GetError();
         }
+
+
+        renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+        if (!renderer) {
+            throw string("renderer could not be created: ") + SDL_GetError();
+        }
+
     }
 
     ~Game() {
