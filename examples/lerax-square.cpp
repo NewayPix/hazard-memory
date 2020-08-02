@@ -39,6 +39,11 @@ struct Player {
         rect.h = size;
     }
 
+    void reset_to_last_position() {
+        position.x = rect.x;
+        position.y = rect.y;
+    }
+
     void set_direction(struct KeyboardState *k) {
         direction.x = k->right? 1: k->left? -1: 0;
         direction.y = k->up? 1: k->down? -1: 0;
@@ -179,16 +184,14 @@ private:
         }
 
 
-        if (player.position.x < 0) {
-            player.position.x = 0;
-        } else if (player.position.x + player.size > SCREEN_WIDTH) {
-            player.position.x = SCREEN_WIDTH - player.size;
+        // window boundary collision
+        if (player.position.x < 0 \
+            || player.position.y < 0 \
+            || player.position.x + player.size > SCREEN_WIDTH \
+            || player.position.y + player.size > SCREEN_HEIGHT) {
+            player.reset_to_last_position();
         }
-        if (player.position.y < 0) {
-            player.position.y = 0;
-        } else if (player.position.y + player.size > SCREEN_HEIGHT) {
-            player.position.y = SCREEN_HEIGHT - player.size;
-        }
+
 
         player.rect.x = round(player.position.x);
         player.rect.y = round(player.position.y);
