@@ -2,6 +2,7 @@
 #include <cmath>
 #include <string>
 #include <deque>
+#include <vector>
 
 #include <SDL2/SDL.h>
 #include <Vector2D.hpp>
@@ -34,14 +35,49 @@ struct Player {
     SDL_Rect rect = {0, 0, size, size};
 
     void set_size(int size) {
+        position.x += (this->size - size);
+        position.y += (this->size - size);
         this->size = size;
         rect.w = size;
         rect.h = size;
+
+    }
+
+    /*
+     * Check if the player is on top of some block
+     */
+    bool on_ground(vector<SDL_Rect> &blocks) {
+        for (auto b: blocks) {
+            float d = b.y - position.y - rect.h;
+            if (position.x >= (b.x - rect.w) && position.x <= (b.x + b.w) && d == 0)  {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    bool collision(vector<SDL_Rect> &blocks) {
+        Vector2D player_center = Vector2D(position.x + rect.w/2, position.y + rect.h/2);
+        for (auto b: blocks) {
+            Vector2D block_center(b.x + b.w/2, b.y + b.h/2);
+            Vector2D d = player_center - block_center;
+            if (abs(d.x) < (rect.w + b.w)/2 &&  abs(d.y) < (rect.h + b.h) / 2) {
+                return true;
+            }
+        }
+        return false;
     }
 
     void reset_to_last_position() {
         position.x = rect.x;
         position.y = rect.y;
+        velocity.y = 0;
+    }
+
+    void update_rect() {
+        rect.x = round(position.x);
+        rect.y = round(position.y);
     }
 
     void set_direction(struct KeyboardState *k) {
@@ -94,7 +130,8 @@ private:
     bool running = true;
     struct Player player = {};
     struct KeyboardState keyboard = {};
-    std::deque<SDL_Rect> squares_shadow;
+    deque<SDL_Rect> squares_shadow;
+    vector<SDL_Rect> blocks;
     unsigned int squares_max = 50;
     unsigned long frames = 0;
 
@@ -156,11 +193,13 @@ private:
     }
 
     void update(float dt) {
+        // velocity change
         if (keyboard.velocity_up) {
             player.velocity.x += 50;
             player.set_size(player.size + 10);
             keyboard.velocity_up = false;
         }
+
         if (keyboard.velocity_down) {
             player.velocity.x -= 50;
             if (player.velocity.x <= 50) player.velocity.x = 50;
@@ -168,33 +207,32 @@ private:
             if (player.size <= 10) player.set_size(10);
             keyboard.velocity_down = false;
         }
-
-        if (keyboard.valid_move()) {
-            player.set_direction(&keyboard);
-            player.move(dt, keyboard.run);
-        }
-
         // gravity velocity
-        if (player.position.y + player.size < SCREEN_HEIGHT) {
-            player.velocity.y += 15 * G * dt;
-            player.position.y += 4 * player.velocity.y * dt;
-        } else {
+        if (player.on_ground(blocks)) {
             player.velocity.y = 0;
             player.try_jump(dt);
+        } else {
+            player.velocity.y += 15 * G * dt;
+            player.position.y += 4 * player.velocity.y * dt;
         }
-
-
-        // window boundary collision
-        if (player.position.x < 0 \
-            || player.position.y < 0 \
-            || player.position.x + player.size > SCREEN_WIDTH \
-            || player.position.y + player.size > SCREEN_HEIGHT) {
+        // collision detection
+        if (player.collision(blocks)) {
             player.reset_to_last_position();
+        } else {
+            // player movement
+            Vector2D copy_position = player.position.copy();
+            if (keyboard.valid_move()) {
+                player.set_direction(&keyboard);
+                player.move(dt, keyboard.run);
+            }
+            if (player.collision(blocks))  {
+                player.position = copy_position;
+            }
+
+            // valid state
+            player.update_rect();
         }
 
-
-        player.rect.x = round(player.position.x);
-        player.rect.y = round(player.position.y);
 
         static float interval = 0;
         if (interval <= 0) {
@@ -220,12 +258,53 @@ private:
         int size = squares_shadow.size();
         for(int i = 0; i < size; ++i) {
             int factor = round(255 * ((float) (i + 1) / size));
-            SDL_SetRenderDrawColor(renderer, 0, factor, 255, factor);
+            SDL_SetRenderDrawColor(renderer, 0, factor, 255, 255);
             SDL_RenderFillRect(renderer, &squares_shadow[i]);
         }
 
+        for(auto b: blocks) {
+            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+            SDL_RenderDrawRect(renderer, &b);
+        }
+
+
         // render everything
         SDL_RenderPresent(renderer);
+    }
+
+    void init_blocks() {
+        // main floor
+        int block_size = 50;
+        SDL_Rect floor = {.x=0, .y=SCREEN_HEIGHT, .w=SCREEN_WIDTH, .h=1};
+        SDL_Rect right_wall = {.x=SCREEN_WIDTH, .y=0,
+                              .w=1, .h=SCREEN_HEIGHT};
+        SDL_Rect left_wall = {.x=-1, .y=0, .w=1, .h=SCREEN_HEIGHT};
+        SDL_Rect ceil = {.x=0, .y=-1, .w=SCREEN_WIDTH, .h=1};
+        SDL_Rect block1 = {.x=0, .y=SCREEN_HEIGHT-block_size,
+                           .w=2*block_size, .h=block_size};
+        SDL_Rect block2 = {.x=SCREEN_WIDTH/4, .y=SCREEN_HEIGHT-3*block_size,
+                           .w=2*block_size, .h=block_size};
+        SDL_Rect block3 = {.x=SCREEN_WIDTH/2, .y=SCREEN_HEIGHT-4*block_size,
+                           .w=2*block_size, .h=block_size};
+        SDL_Rect block4 = {.x=SCREEN_WIDTH/6, .y=SCREEN_HEIGHT-6*block_size,
+                           .w=2*block_size, .h=block_size};
+        SDL_Rect block5 = {.x=SCREEN_WIDTH/2, .y=SCREEN_HEIGHT-8*block_size,
+                           .w=2*block_size, .h=block_size};
+
+        SDL_Rect block6 = {.x=SCREEN_WIDTH-2*block_size, .y=SCREEN_HEIGHT-10*block_size,
+                           .w=2*block_size, .h=block_size};
+
+        blocks.push_back(floor);
+        blocks.push_back(left_wall);
+        blocks.push_back(right_wall);
+        blocks.push_back(ceil);
+        blocks.push_back(block1);
+        blocks.push_back(block2);
+        blocks.push_back(block3);
+        blocks.push_back(block4);
+        blocks.push_back(block5);
+        blocks.push_back(block6);
+
     }
 
 public:
@@ -233,6 +312,8 @@ public:
         cout << ":: Game initialization!" << endl;
         player.position.x = SCREEN_WIDTH / 2;
         player.position.y = SCREEN_HEIGHT - player.size;
+        player.update_rect();
+        init_blocks();
 
         if (SDL_Init(SDL_INIT_VIDEO) < 0) {
             throw string("SDL could not initialize: ") + SDL_GetError();
@@ -283,6 +364,8 @@ public:
             cout << "Player position: \t" << string(player.position) << endl;
             cout << "Player velocity: \t" << string(player.velocity) << endl;
             cout << "            FPS: \t" << frames - lastFrames << endl;
+            cout << "      on ground: \t" << player.on_ground(blocks) << endl;
+            cout << "      collision: \t" << player.collision(blocks) << endl;
             cout << endl;
             lastFrames = frames;
             debugTime = 0;
