@@ -69,7 +69,7 @@ struct Player {
 
     void move(float dt, Vector2D velocity) {
         position.x += cos_direction() * velocity.x * dt;
-        // position.y += sin_direction() * velocity * dt;
+        //position.y += sin_direction() * velocity.x * dt;
     }
 
     void move(float dt, bool run) {
@@ -89,8 +89,8 @@ private:
     bool running = true;
     struct Player player = {};
     struct KeyboardState keyboard = {};
-    std::deque<SDL_Rect> squares;
-    unsigned int queue_max = 30;
+    std::deque<SDL_Rect> squares_shadow;
+    unsigned int squares_max = 50;
     unsigned long frames = 0;
 
     void event(SDL_Event *e) {
@@ -196,12 +196,12 @@ private:
         static float interval = 0;
         if (interval <= 0) {
             interval = 0.01;
-            if (squares.size() > queue_max) {
-                squares.pop_front();
+            if (squares_shadow.size() > squares_max) {
+                squares_shadow.pop_front();
             } else {
                 SDL_Rect rect = {player.rect.x, player.rect.y,
                                  player.size, player.size};
-                squares.push_back(rect);
+                squares_shadow.push_back(rect);
             }
         }
 
@@ -214,11 +214,11 @@ private:
         SDL_RenderClear(renderer);
 
         // player
-        int size = squares.size();
+        int size = squares_shadow.size();
         for(int i = 0; i < size; ++i) {
             int factor = round(255 * ((float) (i + 1) / size));
             SDL_SetRenderDrawColor(renderer, 0, factor, 255, factor);
-            SDL_RenderFillRect(renderer, &squares[i]);
+            SDL_RenderFillRect(renderer, &squares_shadow[i]);
         }
 
         // render everything
