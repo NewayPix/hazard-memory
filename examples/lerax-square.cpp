@@ -23,7 +23,8 @@ struct KeyboardState {
     bool run;
 
     bool valid_move() {
-        return (up || down || left || right) && !((up && down) || (left && right));
+        return (up || down || left || right) && \
+               !((up && down) || (left && right));
     }
 };
 
@@ -49,7 +50,9 @@ struct Player {
     bool on_ground(vector<SDL_Rect> &blocks) {
         for (auto b: blocks) {
             float d = b.y - position.y - rect.h;
-            if (position.x >= (b.x - rect.w) && position.x <= (b.x + b.w) && d == 0)  {
+            int x_min = b.x - rect.w;
+            int x_max = b.x + b.w;
+            if (position.x >= x_min && position.x <= x_max && d == 0)  {
                 return true;
             }
         }
@@ -57,8 +60,11 @@ struct Player {
         return false;
     }
 
+    /*
+     * Check if the player collides with some block
+     */
     bool collision(vector<SDL_Rect> &blocks) {
-        Vector2D player_center = Vector2D(position.x + rect.w/2, position.y + rect.h/2);
+        Vector2D player_center(position.x + rect.w/2, position.y + rect.h/2);
         for (auto b: blocks) {
             Vector2D block_center(b.x + b.w/2, b.y + b.h/2);
             Vector2D d = player_center - block_center;
@@ -104,7 +110,6 @@ struct Player {
         }
     }
 
-
     void move(float dt, Vector2D velocity) {
         position.x += cos_direction() * velocity.x * dt;
         //position.y += sin_direction() * velocity.x * dt;
@@ -129,7 +134,7 @@ private:
     struct KeyboardState keyboard = {};
     deque<SDL_Rect> squares_shadow;
     vector<SDL_Rect> blocks;
-    unsigned int squares_max = 50;
+    unsigned int squares_max = 50; /* Max size of squares_shadow container */
     unsigned long frames = 0;
 
     void event() {
@@ -201,7 +206,7 @@ private:
             cout << "      on ground: \t" << player.on_ground(blocks) << endl;
             cout << "      collision: \t" << player.collision(blocks) << endl;
             cout << fixed;
-            cout.precision(10);
+            cout.precision(5);
             cout << "             dt: \t" << dt << endl;
             cout << endl;
             lastFrames = frames;
@@ -254,9 +259,9 @@ private:
         }
 
 
-        static float interval = 0;
-        if (interval <= 0) {
-            interval = 0.01;
+        static float shadow_interval = 0;
+        if (shadow_interval <= 0) {
+            shadow_interval = 0.005;
             if (squares_shadow.size() > squares_max) {
                 squares_shadow.pop_front();
             } else {
@@ -266,7 +271,7 @@ private:
             }
         }
 
-        interval -= dt;
+        shadow_interval -= dt;
         debug(dt);
     }
 
@@ -283,6 +288,7 @@ private:
             SDL_RenderFillRect(renderer, &squares_shadow[i]);
         }
 
+        // platform blocks
         for(auto b: blocks) {
             SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
             SDL_RenderDrawRect(renderer, &b);
@@ -337,6 +343,13 @@ private:
 
     }
 
+    float dt() {
+        static Uint32 clock = SDL_GetTicks();
+        float delta = (SDL_GetTicks() - clock) / 1000.0f;
+        clock = SDL_GetTicks();
+        return delta;
+    }
+
 public:
     Game() {
         cout << ":: Game initialization!" << endl;
@@ -377,13 +390,6 @@ public:
         window = NULL;
 
         SDL_Quit();
-    }
-
-    float dt() {
-        static Uint32 clock = SDL_GetTicks();
-        float delta = (SDL_GetTicks() - clock) / 1000.0f;
-        clock = SDL_GetTicks();
-        return delta;
     }
 
     void run() {
