@@ -7,6 +7,7 @@
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
+#define G 9.8
 
 using namespace std;
 
@@ -17,6 +18,7 @@ struct KeyboardState {
     bool down;
     bool velocity_up;
     bool velocity_down;
+    bool run;
 
     bool valid_move() {
         return (up || down || left || right) && !((up && down) || (left && right));
@@ -29,6 +31,7 @@ struct Player {
     int size = 50;
     SDL_Rect rect = {0, 0, size, size};
     float velocity = 300;
+    float gravity_velocity = 0;
 
     void set_direction(struct KeyboardState *k) {
         direction.x = k->right? 1: k->left? -1: 0;
@@ -46,9 +49,28 @@ struct Player {
         return -direction.y * sin;
     }
 
+    void try_jump(float dt) {
+        if (direction.y == 1) {
+            gravity_velocity = -100;
+            position.y += gravity_velocity * dt;
+        }
+    }
+
     void move(float dt) {
+        move(dt, velocity);
+    }
+
+    void move(float dt, float velocity) {
         position.x += cos_direction() * velocity * dt;
-        position.y += sin_direction() * velocity * dt;
+        // position.y += sin_direction() * velocity * dt;
+    }
+
+    void move(float dt, bool run) {
+        if (run) {
+            move(dt, velocity * 2);
+        } else {
+            move(dt);
+        }
     }
 };
 
@@ -90,6 +112,9 @@ private:
                 case SDLK_s:
                     keyboard.velocity_down = true;
                     break;
+                case SDLK_LSHIFT:
+                    keyboard.run = true;
+                    break;
                 }
                 break;
             case SDL_KEYUP:
@@ -105,6 +130,9 @@ private:
                     break;
                 case SDLK_RIGHT:
                     keyboard.right = false;
+                    break;
+                case SDLK_LSHIFT:
+                    keyboard.run = false;
                     break;
                 }
                 break;
@@ -125,8 +153,18 @@ private:
 
         if (keyboard.valid_move()) {
             player.set_direction(&keyboard);
-            player.move(dt);
+            player.move(dt, keyboard.run);
         }
+
+        // gravity velocity
+        if (player.position.y + player.size < SCREEN_HEIGHT) {
+            player.gravity_velocity += 15 * G * dt;
+            player.position.y += 4 * player.gravity_velocity * dt;
+        } else {
+            player.gravity_velocity = 0;
+            player.try_jump(dt);
+        }
+
 
         if (player.position.x < 0) {
             player.position.x = 0;
@@ -160,7 +198,7 @@ public:
     Game() {
         cout << ":: Game initialization!" << endl;
         player.position.x = SCREEN_WIDTH / 2;
-        player.position.y = SCREEN_HEIGHT / 2;
+        player.position.y = SCREEN_HEIGHT - player.size;
 
         if(SDL_Init(SDL_INIT_VIDEO) < 0) {
             throw string("SDL could not initialize: ") + SDL_GetError();
@@ -206,12 +244,13 @@ public:
 
     void run() {
         SDL_Event e;
-        float debugTime = 0;
+        Uint32 clock = 0;
+        float dt = 0, debugTime = 0;
         do {
-            Uint32 clock = SDL_GetTicks();
+            dt = this->dt(clock);
+            clock = SDL_GetTicks();
             event(&e);
             render();
-            float dt = this->dt(clock);
             update(dt);
             debugTime += dt;
             if (debugTime > 1) {
