@@ -104,9 +104,6 @@ struct Player {
         }
     }
 
-    void move(float dt) {
-        move(dt, velocity);
-    }
 
     void move(float dt, Vector2D velocity) {
         position.x += cos_direction() * velocity.x * dt;
@@ -117,7 +114,7 @@ struct Player {
         if (run) {
             move(dt, velocity * 2);
         } else {
-            move(dt);
+            move(dt, velocity);
         }
     }
 };
@@ -135,14 +132,15 @@ private:
     unsigned int squares_max = 50;
     unsigned long frames = 0;
 
-    void event(SDL_Event *e) {
-        while (SDL_PollEvent(e)) {
-            switch (e->type) {
+    void event() {
+        static SDL_Event e;
+        while (SDL_PollEvent(&e)) {
+            switch (e.type) {
             case SDL_QUIT:
                 running = false;
                 break;
             case SDL_KEYDOWN:
-                switch(e->key.keysym.sym) {
+                switch(e.key.keysym.sym) {
                 case SDLK_ESCAPE:
                     running = false;
                     break;
@@ -170,7 +168,7 @@ private:
                 }
                 break;
             case SDL_KEYUP:
-                switch(e->key.keysym.sym) {
+                switch(e.key.keysym.sym) {
                 case SDLK_UP:
                     keyboard.up = false;
                     break;
@@ -190,6 +188,27 @@ private:
                 break;
             }
         }
+    }
+
+    void debug(float dt) {
+        static float debugTime = 0;
+        if (debugTime > 1) {
+            static unsigned long lastFrames = frames;
+            cout << "--- DEBUG ---" << endl;
+            cout << "Player position: \t" << string(player.position) << endl;
+            cout << "Player velocity: \t" << string(player.velocity) << endl;
+            cout << "            FPS: \t" << frames - lastFrames << endl;
+            cout << "      on ground: \t" << player.on_ground(blocks) << endl;
+            cout << "      collision: \t" << player.collision(blocks) << endl;
+            cout << fixed;
+            cout.precision(10);
+            cout << "             dt: \t" << dt << endl;
+            cout << endl;
+            lastFrames = frames;
+            debugTime = 0;
+        }
+        debugTime += dt;
+        frames++;
     }
 
     void update(float dt) {
@@ -215,6 +234,7 @@ private:
             player.velocity.y += 15 * G * dt;
             player.position.y += 4 * player.velocity.y * dt;
         }
+
         // collision detection
         if (player.collision(blocks)) {
             player.reset_to_last_position();
@@ -247,6 +267,7 @@ private:
         }
 
         interval -= dt;
+        debug(dt);
     }
 
     void render() {
@@ -267,7 +288,6 @@ private:
             SDL_RenderDrawRect(renderer, &b);
         }
 
-
         // render everything
         SDL_RenderPresent(renderer);
     }
@@ -276,23 +296,33 @@ private:
         // main floor
         int block_size = 50;
         SDL_Rect floor = {.x=0, .y=SCREEN_HEIGHT, .w=SCREEN_WIDTH, .h=1};
-        SDL_Rect right_wall = {.x=SCREEN_WIDTH, .y=0,
-                              .w=1, .h=SCREEN_HEIGHT};
+        SDL_Rect right_wall = {.x=SCREEN_WIDTH, .y=0, .w=1, .h=SCREEN_HEIGHT};
         SDL_Rect left_wall = {.x=-1, .y=0, .w=1, .h=SCREEN_HEIGHT};
         SDL_Rect ceil = {.x=0, .y=-1, .w=SCREEN_WIDTH, .h=1};
-        SDL_Rect block1 = {.x=0, .y=SCREEN_HEIGHT-block_size,
-                           .w=2*block_size, .h=block_size};
-        SDL_Rect block2 = {.x=SCREEN_WIDTH/4, .y=SCREEN_HEIGHT-3*block_size,
-                           .w=2*block_size, .h=block_size};
-        SDL_Rect block3 = {.x=SCREEN_WIDTH/2, .y=SCREEN_HEIGHT-4*block_size,
-                           .w=2*block_size, .h=block_size};
-        SDL_Rect block4 = {.x=SCREEN_WIDTH/6, .y=SCREEN_HEIGHT-6*block_size,
-                           .w=2*block_size, .h=block_size};
-        SDL_Rect block5 = {.x=SCREEN_WIDTH/2, .y=SCREEN_HEIGHT-8*block_size,
-                           .w=2*block_size, .h=block_size};
-
-        SDL_Rect block6 = {.x=SCREEN_WIDTH-2*block_size, .y=SCREEN_HEIGHT-10*block_size,
-                           .w=2*block_size, .h=block_size};
+        SDL_Rect block1 = {.x=0,
+                           .y=SCREEN_HEIGHT-block_size,
+                           .w=2*block_size,
+                           .h=block_size};
+        SDL_Rect block2 = {.x=SCREEN_WIDTH/4,
+                           .y=SCREEN_HEIGHT-3*block_size,
+                           .w=2*block_size,
+                           .h=block_size};
+        SDL_Rect block3 = {.x=SCREEN_WIDTH/2,
+                           .y=SCREEN_HEIGHT-4*block_size,
+                           .w=2*block_size,
+                           .h=block_size};
+        SDL_Rect block4 = {.x=SCREEN_WIDTH/6,
+                           .y=SCREEN_HEIGHT-6*block_size,
+                           .w=2*block_size,
+                           .h=block_size};
+        SDL_Rect block5 = {.x=SCREEN_WIDTH/2,
+                           .y=SCREEN_HEIGHT-8*block_size,
+                           .w=2*block_size,
+                           .h=block_size};
+        SDL_Rect block6 = {.x=SCREEN_WIDTH-2*block_size,
+                           .y=SCREEN_HEIGHT-10*block_size,
+                           .w=2*block_size,
+                           .h=block_size};
 
         blocks.push_back(floor);
         blocks.push_back(left_wall);
@@ -356,33 +386,11 @@ public:
         return delta;
     }
 
-    void debug(float dt) {
-        static float debugTime = 0;
-        if (debugTime > 1) {
-            static unsigned long lastFrames = frames;
-            cout << "--- DEBUG ---" << endl;
-            cout << "Player position: \t" << string(player.position) << endl;
-            cout << "Player velocity: \t" << string(player.velocity) << endl;
-            cout << "            FPS: \t" << frames - lastFrames << endl;
-            cout << "      on ground: \t" << player.on_ground(blocks) << endl;
-            cout << "      collision: \t" << player.collision(blocks) << endl;
-            cout << endl;
-            lastFrames = frames;
-            debugTime = 0;
-        }
-        debugTime += dt;
-
-    }
-
     void run() {
-        SDL_Event e;
         do {
-            float dt = this->dt();
-            event(&e);
-            update(dt);
-            debug(dt);
+            event();
+            update(dt());
             render();
-            frames++;
         } while(running);
     }
 };
