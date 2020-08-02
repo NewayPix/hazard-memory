@@ -33,6 +33,15 @@ public:
         return dot(v) / (this->norm() * v.norm());
     }
 
+    float distance(const Vector2D &v) {
+        float d_x = x - v.x;
+        float d_y = y - v.y;
+        return sqrt(d_x * d_x + d_y * d_y);
+    }
+
+    Vector2D copy() {
+        return Vector2D(x, y);
+    }
 
     /*
      * Vector2D with Vector2D operations
