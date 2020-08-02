@@ -32,6 +32,11 @@ struct Player {
     int size = 50;
     SDL_Rect rect = {0, 0, size, size};
 
+    void set_size(int size) {
+        this->size = size;
+        rect.w = size;
+        rect.h = size;
+    }
 
     void set_direction(struct KeyboardState *k) {
         direction.x = k->right? 1: k->left? -1: 0;
@@ -53,6 +58,7 @@ struct Player {
         if (direction.y == 1) {
             velocity.y = -100;
             position.y += velocity.y * dt;
+            direction.y = 0;
         }
     }
 
@@ -143,11 +149,14 @@ private:
     void update(float dt) {
         if (keyboard.velocity_up) {
             player.velocity.x += 50;
+            player.set_size(player.size + 10);
             keyboard.velocity_up = false;
         }
         if (keyboard.velocity_down) {
             player.velocity.x -= 50;
             if (player.velocity.x <= 50) player.velocity.x = 50;
+            player.set_size(player.size - 10);
+            if (player.size <= 10) player.set_size(10);
             keyboard.velocity_down = false;
         }
 
