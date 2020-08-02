@@ -8,6 +8,7 @@ int main(void) {
     assert(u.dot(v) == 0);
     assert(u.norm() == 1);
     assert(u.cos(v) == 0);
+    assert(u.distance(v) > 0);
     // test operators
     assert((u + v) == Vector2D(1, 1));
     assert((u - v) == Vector2D(1, -1));
