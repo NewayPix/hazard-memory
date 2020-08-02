@@ -28,10 +28,10 @@ struct KeyboardState {
 struct Player {
     Vector2D position = {0, 0};
     Vector2D direction = {0, 0};
+    Vector2D velocity = {300, 0};
     int size = 50;
     SDL_Rect rect = {0, 0, size, size};
-    float velocity = 300;
-    float gravity_velocity = 0;
+
 
     void set_direction(struct KeyboardState *k) {
         direction.x = k->right? 1: k->left? -1: 0;
@@ -51,8 +51,8 @@ struct Player {
 
     void try_jump(float dt) {
         if (direction.y == 1) {
-            gravity_velocity = -100;
-            position.y += gravity_velocity * dt;
+            velocity.y = -100;
+            position.y += velocity.y * dt;
         }
     }
 
@@ -60,8 +60,8 @@ struct Player {
         move(dt, velocity);
     }
 
-    void move(float dt, float velocity) {
-        position.x += cos_direction() * velocity * dt;
+    void move(float dt, Vector2D velocity) {
+        position.x += cos_direction() * velocity.x * dt;
         // position.y += sin_direction() * velocity * dt;
     }
 
@@ -142,12 +142,12 @@ private:
 
     void update(float dt) {
         if (keyboard.velocity_up) {
-            player.velocity += 50;
+            player.velocity.x += 50;
             keyboard.velocity_up = false;
         }
         if (keyboard.velocity_down) {
-            player.velocity -= 50;
-            if (player.velocity <= 50) player.velocity = 50;
+            player.velocity.x -= 50;
+            if (player.velocity.x <= 50) player.velocity.x = 50;
             keyboard.velocity_down = false;
         }
 
@@ -158,10 +158,10 @@ private:
 
         // gravity velocity
         if (player.position.y + player.size < SCREEN_HEIGHT) {
-            player.gravity_velocity += 15 * G * dt;
-            player.position.y += 4 * player.gravity_velocity * dt;
+            player.velocity.y += 15 * G * dt;
+            player.position.y += 4 * player.velocity.y * dt;
         } else {
-            player.gravity_velocity = 0;
+            player.velocity.y = 0;
             player.try_jump(dt);
         }
 
