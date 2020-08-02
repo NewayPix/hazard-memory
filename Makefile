@@ -1,7 +1,7 @@
-CC = g++
+CXX = g++
 SRC_DIR = src
 INCLUDES = $(shell pkg-config --cflags sdl2) -I $(SRC_DIR)
-CFLAGS = -w $(INCLUDES) -g -Wall -Wextra -Werror
+CXXFLAGS = -w $(INCLUDES) -g -Wall -Wextra -Werror
 LFLAGS = -lSDL2 -lm
 SRCS = $(wildcard $(SRC_DIR)/*.cpp)
 TESTS = $(wildcard tests/*.cpp)
@@ -13,15 +13,15 @@ BIN_NAME = hazard-memory.bin
 
 
 all: $(OBJS)
-	$(CC) $(OBJS) $(CFLAGS) $(LFLAGS) -o $(BIN_NAME)
+	$(CXX) $(OBJS) $(CXXFLAGS) $(LFLAGS) -o $(BIN_NAME)
 
 %.o: %.cpp
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CXX) -c $(CXXFLAGS) $< -o $@
 
 # running examples easily
 FORCE:
 examples/%.cpp: FORCE
-	$(CC) $@ $(CFLAGS) $(LFLAGS) -o $(@:%.cpp=%.bin)
+	$(CXX) $@ $(CXXFLAGS) $(LFLAGS) -o $(@:%.cpp=%.bin)
 	$(if $(RUN_EXAMPLE), ./$(@:%.cpp=%.bin))
 
 examples: $(EXAMPLES)
@@ -38,7 +38,7 @@ check:
 	@make
 
 tests/%.bin: tests/%.cpp
-	@$(CC) $(LFLAGS) $(CFLAGS) $< -o $@
+	@$(CXX) $(LFLAGS) $(CXXFLAGS) $< -o $@
 	@./$@
 	@rm -f $@
 	@echo -- $< [ok]
@@ -51,8 +51,8 @@ clean:
 
 # for debug purposes
 vars:
-	@echo CC       = $(CC)
-	@echo CFLAGS   = $(CFLAGS)
+	@echo CXX      = $(CXX)
+	@echo CXXFLAGS = $(CXXFLAGS)
 	@echo LFLAGS   = $(LFLAGS)
 	@echo SRC_DIR  = $(SRC_DIR)
 	@echo SRCS     = $(SRCS)
