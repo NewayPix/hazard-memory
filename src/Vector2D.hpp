@@ -22,7 +22,7 @@ public:
      */
 
     float norm() const {
-        return sqrt(x * x + y * y);
+        return std::sqrt(x * x + y * y);
     }
 
     float dot(const Vector2D &v) {
@@ -36,7 +36,7 @@ public:
     float distance(const Vector2D &v) {
         float d_x = x - v.x;
         float d_y = y - v.y;
-        return sqrt(d_x * d_x + d_y * d_y);
+        return std::sqrt(d_x * d_x + d_y * d_y);
     }
 
     Vector2D copy() {
