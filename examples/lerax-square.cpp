@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cmath>
 #include <string>
+#include <deque>
 
 #include <SDL2/SDL.h>
 #include <Vector2D.hpp>
@@ -88,6 +89,8 @@ private:
     bool running = true;
     struct Player player;
     struct KeyboardState keyboard = {};
+    std::deque<SDL_Rect> squares;
+    unsigned int queue_max = 30;
 
     void event(SDL_Event *e) {
         while (SDL_PollEvent(e)) {
@@ -188,6 +191,20 @@ private:
 
         player.rect.x = round(player.position.x);
         player.rect.y = round(player.position.y);
+
+        static float interval = 0;
+        if (interval <= 0) {
+            interval = 0.01;
+            if (squares.size() > queue_max) {
+                squares.pop_back();
+            } else {
+                SDL_Rect rect = {player.rect.x, player.rect.y,
+                                 player.size, player.size};
+                squares.push_front(rect);
+            }
+        }
+
+        interval -= dt;
     }
 
     void render() {
@@ -196,8 +213,12 @@ private:
         SDL_RenderClear(renderer);
 
         // player
-        SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
-        SDL_RenderFillRect(renderer, &player.rect);
+        int size = squares.size();
+        for(int i = 0; i < size; ++i) {
+            int factor = round(255 * ((float) (i + 1) / size));
+            SDL_SetRenderDrawColor(renderer, 0, factor, factor, factor);
+            SDL_RenderFillRect(renderer, &squares[i]);
+        }
 
         // render everything
         SDL_RenderPresent(renderer);
