@@ -9,6 +9,7 @@
                                          (format "-I%s"
                                                  src-path))))
                    (setq-local flycheck-clang-include-path include-path)
+                   (setq-local flycheck-gcc-include-path include-path)
                    (setq-local company-clang-arguments clang-argument)
                    (setq-local company-c-headers-path-user
                                (append company-c-headers-path-user
