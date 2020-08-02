@@ -3,6 +3,7 @@
 #include <string>
 #include <deque>
 #include <vector>
+#include <chrono>
 
 #include <SDL2/SDL.h>
 #include <Vector2D.hpp>
@@ -206,8 +207,8 @@ private:
             cout << "      on ground: \t" << player.on_ground(blocks) << endl;
             cout << "      collision: \t" << player.collision(blocks) << endl;
             cout << fixed;
-            cout.precision(5);
-            cout << "             dt: \t" << dt << endl;
+            cout.precision(7);
+            cout << "             dt: \t" << dt << "s" << endl;
             cout << endl;
             lastFrames = frames;
             debugTime = 0;
@@ -343,10 +344,16 @@ private:
 
     }
 
+    uint64_t tick() {
+        using namespace std::chrono;
+        auto now = high_resolution_clock::now();
+        return duration_cast<microseconds>(now.time_since_epoch()).count();
+    }
+
     float dt() {
-        static Uint32 clock = SDL_GetTicks();
-        float delta = (SDL_GetTicks() - clock) / 1000.0f;
-        clock = SDL_GetTicks();
+        static auto clock = tick();
+        float delta = (tick() - clock) / 1000000.0f;
+        clock = tick();
         return delta;
     }
 
