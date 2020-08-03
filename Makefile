@@ -1,10 +1,12 @@
 CC = g++
 SRC_DIR = src
 INCLUDES = $(shell pkg-config --cflags sdl2) -I $(SRC_DIR)
-CFLAGS = -w $(INCLUDES) -g
+CFLAGS = -w $(INCLUDES) -g -Wall -Wextra -Werror
 LFLAGS = -lSDL2 -lm
 SRCS = $(wildcard $(SRC_DIR)/*.cpp)
 TESTS = $(wildcard tests/*.cpp)
+EXAMPLES = $(wildcard examples/*.cpp)
+RUN_EXAMPLE=1
 TESTS_OBJS = $(TESTS:%.cpp=%.bin)
 OBJS = $(SRCS:%.cpp=%.o)
 BIN_NAME = hazard-memory.bin
@@ -20,9 +22,20 @@ all: $(OBJS)
 FORCE:
 examples/%.cpp: FORCE
 	$(CC) $@ $(CFLAGS) $(LFLAGS) -o $(@:%.cpp=%.bin)
-	./$(@:%.cpp=%.bin)
+	$(if $(RUN_EXAMPLE), ./$(@:%.cpp=%.bin))
+
+examples: $(EXAMPLES)
 
 tests: $(TESTS_OBJS)
+
+check:
+	@echo "-- Test everything"
+	@echo "-- Unit Testing"
+	@make tests
+	@echo "-- Compile examples"
+	@make examples RUN_EXAMPLE=
+	@echo "-- Compile main project"
+	@make
 
 tests/%.bin: tests/%.cpp
 	@$(CC) $(LFLAGS) $(CFLAGS) $< -o $@
@@ -47,4 +60,4 @@ vars:
 	@echo BIN_NAME = $(BIN_NAME)
 
 
-.PHONY: debug
+.PHONY: vars
