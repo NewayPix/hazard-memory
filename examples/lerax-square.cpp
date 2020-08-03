@@ -3,7 +3,8 @@
 #include <string>
 
 #include <SDL2/SDL.h>
-#include <Vector2D.hpp>
+
+#include "Vector2D.hpp"
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
