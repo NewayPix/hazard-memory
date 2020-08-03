@@ -1,3 +1,5 @@
+![test](https://github.com/ryukinix/hazard-memory/workflows/test/badge.svg)
+
 # hazard-memory
 An experimental  SDL2 Platform Game written in C++
 

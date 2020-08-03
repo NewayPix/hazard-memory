@@ -1,0 +1,16 @@
+name: test
+
+on: [push]
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        compiler: [g++, clang++]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup SDL2
+      run: sudo apt install libsdl2-dev -y
+    - name: Test
+      run: make check CXX=${{ matrix.compiler }}
