@@ -1,5 +1,6 @@
 #include <Vector2D.hpp>
 #include <cassert>
+#include <string>
 
 int main(void) {
     Vector2D u(1, 0);
@@ -8,6 +9,7 @@ int main(void) {
     assert(u.dot(v) == 0);
     assert(u.norm() == 1);
     assert(u.cos(v) == 0);
+    assert(u.distance(v) > 0);
     // test operators
     assert((u + v) == Vector2D(1, 1));
     assert((u - v) == Vector2D(1, -1));
@@ -21,5 +23,8 @@ int main(void) {
     assert((u -= v) == Vector2D(0, -1));
     assert((u *= 2) == Vector2D(0, -2));
     assert((u /= 2) == Vector2D(0, -1));
+    // test extra methods
+    assert(Vector2D(u) == u);
+    assert(std::string(u) == "<0, -1>");
     return 0;
 }

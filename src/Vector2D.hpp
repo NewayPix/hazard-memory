@@ -1,6 +1,8 @@
 #ifndef VECTOR2D_HPP
 #define VECTOR2D_HPP
 #include <cmath>
+#include <string>
+#include <sstream>
 
 class Vector2D {
 public:
@@ -9,12 +11,18 @@ public:
 
     Vector2D(float x, float y): x(x), y(y) {}
 
+    operator std::string() const {
+        std::stringstream s;
+        s << "<" << x << ", " << y <<">";
+        return s.str();
+    }
+
     /*
      * Vector2D linear algebra operations
      */
 
     float norm() const {
-        return sqrt(x * x + y * y);
+        return std::sqrt(x * x + y * y);
     }
 
     float dot(const Vector2D &v) {
@@ -25,7 +33,11 @@ public:
         return dot(v) / (this->norm() * v.norm());
     }
 
-
+    float distance(const Vector2D &v) {
+        float d_x = x - v.x;
+        float d_y = y - v.y;
+        return std::sqrt(d_x * d_x + d_y * d_y);
+    }
 
     /*
      * Vector2D with Vector2D operations
