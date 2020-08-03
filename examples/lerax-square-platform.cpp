@@ -246,7 +246,7 @@ private:
             player.reset_to_last_position();
         } else {
             // player movement
-            Vector2D copy_position = player.position.copy();
+            Vector2D copy_position(player.position);
             if (keyboard.valid_move()) {
                 player.set_direction(&keyboard);
                 player.move(dt, keyboard.run);

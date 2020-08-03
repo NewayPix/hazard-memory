@@ -24,7 +24,7 @@ int main(void) {
     assert((u *= 2) == Vector2D(0, -2));
     assert((u /= 2) == Vector2D(0, -1));
     // test extra methods
-    assert(u.copy() == u);
+    assert(Vector2D(u) == u);
     assert(std::string(u) == "<0, -1>");
     return 0;
 }
