@@ -1,7 +1,9 @@
 #include <cassert>
 #include <string>
+
 #include <SDL2/SDL_rect.h>
-#include "Collision.hpp"
+
+#include "collider/ColliderRect.hpp"
 
 int main(void) {
     /*
@@ -39,17 +41,23 @@ int main(void) {
     SDL_Rect r1 = {0, 0, 20, 20};
     SDL_Rect r2 = {0, 20, 20, 20};
     SDL_Rect r3 = {10, 30, 20, 20};
-    // test Collision::rect_on_top method
-    assert(Collision::rect_on_top(r1, r2));
-    assert(!Collision::rect_on_top(r1, r3));
-    assert(!Collision::rect_on_top(r2, r1));
-    assert(!Collision::rect_on_top(r2, r3));
-    assert(!Collision::rect_on_top(r3, r1));
-    assert(!Collision::rect_on_top(r3, r2));
 
-    // test Collision::rect method
-    assert(Collision::rect(r2, r3));
-    assert(!Collision::rect(r1, r2));
-    assert(!Collision::rect(r1, r3));
+    ColliderRect c1(&r1);
+    ColliderRect c2(&r2);
+    ColliderRect c3(&r3);
+
+    // Test on_top method from ColliderRect
+    assert(c1.on_top(c2));
+    assert(!c1.on_top(c3));
+    assert(!c1.on_top(c1));
+    assert(!c1.on_top(c3));
+    assert(!c1.on_top(c1));
+    assert(!c1.on_top(c2));
+
+    // Test collision between two rects
+    assert(c2.collide(c3));
+    assert(!c1.collide(c2));
+    assert(!c1.collide(c3));
+
     return 0;
 }

@@ -1,15 +1,17 @@
-#ifndef VECTOR2D_HPP
-#define VECTOR2D_HPP
+#ifndef VECTOR2_HPP
+#define VECTOR2_HPP
+
 #include <cmath>
 #include <string>
 #include <sstream>
 
-class Vector2D {
+class Vector2 {
 public:
     float x;
     float y;
 
-    Vector2D(float x, float y): x(x), y(y) {}
+    Vector2(): x(0.0f), y(0.0f) {}
+    Vector2(float x, float y): x(x), y(y) {}
 
     operator std::string() const {
         std::stringstream s;
@@ -18,22 +20,22 @@ public:
     }
 
     /*
-     * Vector2D linear algebra operations
+     * Vector2 linear algebra operations
      */
 
     float norm() const {
         return std::sqrt(x * x + y * y);
     }
 
-    float dot(const Vector2D &v) {
+    float dot(const Vector2 &v) {
         return (x * v.x) + (y * v.y);
     }
 
-    float cos(const Vector2D &v) {
+    float cos(const Vector2 &v) {
         return dot(v) / (this->norm() * v.norm());
     }
 
-    float distance(const Vector2D &v) {
+    float distance(const Vector2 &v) {
         float d_x = x - v.x;
         float d_y = y - v.y;
         return std::sqrt(d_x * d_x + d_y * d_y);
@@ -43,27 +45,27 @@ public:
      * Vector2D with Vector2D operations
      */
 
-    Vector2D operator+(const Vector2D &v) {
-        return Vector2D(x + v.x, y + v.y);
+    Vector2 operator+(const Vector2 &v) {
+        return Vector2(x + v.x, y + v.y);
     }
 
-    Vector2D& operator+=(const Vector2D &v) {
+    Vector2& operator+=(const Vector2 &v) {
         x += v.x;
         y += v.y;
         return *this;
     }
 
-    Vector2D operator-(const Vector2D &v) {
-        return Vector2D(x - v.x, y - v.y);
+    Vector2 operator-(const Vector2 &v) {
+        return Vector2(x - v.x, y - v.y);
     }
 
-    Vector2D& operator-=(const Vector2D &v) {
+    Vector2& operator-=(const Vector2 &v) {
         x -= v.x;
         y -= v.y;
         return *this;
     }
 
-    bool operator==(const Vector2D &u) {
+    bool operator==(const Vector2 &u) {
         return u.x == x && u.y == y;
     }
 
@@ -71,41 +73,41 @@ public:
      * Vector2D with scalar operations
      */
 
-    Vector2D operator*(float scalar) {
-        return Vector2D(x * scalar, y * scalar);
+    Vector2 operator*(float scalar) {
+        return Vector2(x * scalar, y * scalar);
     }
 
-    Vector2D& operator*=(float scalar) {
+    Vector2& operator*=(float scalar) {
         x *= scalar;
         y *= scalar;
         return *this;
     }
 
-    Vector2D operator/(float scalar) {
-        return Vector2D(x / scalar, y / scalar);
+    Vector2 operator/(float scalar) {
+        return Vector2(x / scalar, y / scalar);
     }
 
-    Vector2D& operator/=(float scalar) {
+    Vector2& operator/=(float scalar) {
         x /= scalar;
         y /= scalar;
         return *this;
     }
 
-    Vector2D operator-(float scalar) {
-        return Vector2D(x - scalar, y - scalar);
+    Vector2 operator-(float scalar) {
+        return Vector2(x - scalar, y - scalar);
     }
 
-    Vector2D& operator-=(float scalar) {
+    Vector2& operator-=(float scalar) {
         x -= scalar;
         y -= scalar;
         return *this;
     }
 
-    Vector2D operator+(float scalar) {
-        return Vector2D(x + scalar, y + scalar);
+    Vector2 operator+(float scalar) {
+        return Vector2(x + scalar, y + scalar);
     }
 
-    Vector2D& operator+=(float scalar) {
+    Vector2& operator+=(float scalar) {
         x += scalar;
         y += scalar;
         return *this;
@@ -113,4 +115,4 @@ public:
 
 };
 
-#endif
+#endif // Vector2
