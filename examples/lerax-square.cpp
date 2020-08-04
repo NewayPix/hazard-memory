@@ -3,7 +3,8 @@
 #include <string>
 
 #include <SDL2/SDL.h>
-#include <Vector2D.hpp>
+
+#include "Vector2D.hpp"
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
@@ -54,8 +55,8 @@ struct Player {
 
 class Game {
 private:
-    SDL_Window *window = NULL;
-    SDL_Renderer *renderer = NULL;
+    SDL_Window *window = nullptr;
+    SDL_Renderer *renderer = nullptr;
     const char *title = "Square Moving";
     bool running = true;
     struct Player player;
@@ -172,7 +173,7 @@ public:
                                       SCREEN_WIDTH,
                                       SCREEN_HEIGHT,
                                       SDL_WINDOW_SHOWN);
-            if(window == NULL) {
+            if(window == nullptr) {
                 throw string("window could not be created: ") + SDL_GetError();
             }
             else {
@@ -188,10 +189,10 @@ public:
     ~Game() {
         cout << ":: Game being destroyed!" << endl;
         SDL_DestroyRenderer(renderer);
-        renderer = NULL;
+        renderer = nullptr;
 
         SDL_DestroyWindow(window);
-        window = NULL;
+        window = nullptr;
 
         SDL_Quit();
     }
