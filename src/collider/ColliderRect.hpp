@@ -7,9 +7,10 @@
 
 class ColliderRect : public Collider {
 public:
-    ColliderRect(SDL_Rect *r);
-    ColliderRect(int x, int y, int w, int h);
-    ~ColliderRect();
+    ColliderRect(SDL_Rect *r): Collider(r) {}
+    ColliderRect(int x, int y, int w, int h): Collider(x, y, w, h) {}
+
+    ~ColliderRect() {}
 
     /**
      * @brief checks if the current collider is intersecting another one.

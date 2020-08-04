@@ -1,9 +1,6 @@
 #include "Collider.hpp"
 
-Collider::Collider(SDL_Rect *r) {
-    polygon = r;
-    center = Vector2(r->x + r->w/2, r->y + r->h/2);
-}
+Collider::Collider(SDL_Rect *r): Collider(r->x, r->y, r->w, r->h) {}
 
 Collider::Collider(int x, int y, int w, int h) {
     polygon->w = w;

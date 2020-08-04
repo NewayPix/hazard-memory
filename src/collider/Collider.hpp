@@ -2,7 +2,6 @@
 #define COLLISION_HPP
 
 #include <cmath>
-#include <vector>
 
 #include <SDL2/SDL.h>
 

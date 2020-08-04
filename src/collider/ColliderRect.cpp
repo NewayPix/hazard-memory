@@ -1,16 +1,5 @@
 #include "ColliderRect.hpp"
 
-ColliderRect::ColliderRect(SDL_Rect *r): Collider(r) {
-
-}
-
-ColliderRect::ColliderRect(int x, int y, int w, int h): Collider(x, y, w, h) {
-
-}
-
-ColliderRect::~ColliderRect() {}
-
-
 bool ColliderRect::on_top(const ColliderRect &c) {
     float rect_distance = c.polygon->y - \
                             (this->polygon->y + this->polygon->h);
