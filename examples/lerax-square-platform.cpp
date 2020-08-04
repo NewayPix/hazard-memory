@@ -6,7 +6,8 @@
 #include <chrono>
 
 #include <SDL2/SDL.h>
-#include <Vector2D.hpp>
+#include "Vector2D.hpp"
+#include "Collision.hpp"
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
@@ -45,15 +46,19 @@ struct Player {
 
     }
 
+    SDL_Rect current_rect() {
+        SDL_Rect player = {(int)round(position.x), (int)round(position.y),
+                           rect.w, rect.h};
+        return player;
+    }
+
     /*
      * Check if the player is on top of some block
      */
     bool on_ground(vector<SDL_Rect> &blocks) {
-        for (auto b: blocks) {
-            float d = b.y - position.y - rect.h;
-            int x_min = b.x - rect.w;
-            int x_max = b.x + b.w;
-            if (position.x >= x_min && position.x <= x_max && d == 0)  {
+        SDL_Rect player = current_rect();
+        for (auto block: blocks) {
+            if (Collision::rect_on_top(player, block)) {
                 return true;
             }
         }
@@ -65,14 +70,13 @@ struct Player {
      * Check if the player collides with some block
      */
     bool collision(vector<SDL_Rect> &blocks) {
-        Vector2D player_center(position.x + rect.w/2, position.y + rect.h/2);
-        for (auto b: blocks) {
-            Vector2D block_center(b.x + b.w/2, b.y + b.h/2);
-            Vector2D d = player_center - block_center;
-            if (abs(d.x) < (rect.w + b.w)/2 &&  abs(d.y) < (rect.h + b.h) / 2) {
+        SDL_Rect player = current_rect();
+        for (auto block: blocks) {
+            if (Collision::rect(player, block)) {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -127,8 +131,8 @@ struct Player {
 
 class Game {
 private:
-    SDL_Window *window = NULL;
-    SDL_Renderer *renderer = NULL;
+    SDL_Window *window = nullptr;
+    SDL_Renderer *renderer = nullptr;
     const char *title = "Square Moving";
     bool running = true;
     struct Player player = {};
@@ -376,7 +380,7 @@ public:
                                   SCREEN_HEIGHT,
                                   SDL_WINDOW_SHOWN);
 
-        if (window == NULL) {
+        if (window == nullptr) {
             throw string("window could not be created: ") + SDL_GetError();
         }
 
@@ -391,10 +395,10 @@ public:
     ~Game() {
         cout << ":: Game being destroyed!" << endl;
         SDL_DestroyRenderer(renderer);
-        renderer = NULL;
+        renderer = nullptr;
 
         SDL_DestroyWindow(window);
-        window = NULL;
+        window = nullptr;
 
         SDL_Quit();
     }
