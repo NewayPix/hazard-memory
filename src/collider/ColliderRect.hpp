@@ -6,8 +6,6 @@
 #include "Collider.hpp"
 
 class ColliderRect : public Collider {
-private:
-
 public:
     ColliderRect(SDL_Rect *r);
     ColliderRect(int x, int y, int w, int h);
@@ -16,7 +14,8 @@ public:
     /**
      * @brief checks if the current collider is intersecting another one.
      */
-    bool collide(Collider &c) override {
+    bool collide(const Collider &c) {
+        // FIXME: Probable type conversion inside (?)
 
         float x_max = (this->polygon->w + c.polygon->w) / 2;
         float y_max = (this->polygon->h + c.polygon->h) / 2;
@@ -30,17 +29,37 @@ public:
     /**
       * @brief checks if the current collide is on top of another one
       */
-    bool on_top(const Collider &c) {
-        float rect_distance = c.polygon->y - \
-                              (this->polygon->y + this->polygon->h);
+    bool on_top(const ColliderRect &c);
 
-        int x_min = c.polygon->x - this->polygon->w;
-        int x_max = c.polygon->x + this->polygon->w;
+    /**
+     * @brief
+     */
+    std::pair<int, int> get_bounds() {
+        auto p = std::make_pair(polygon->x, polygon->y);
+        return p;
+    }
 
-        bool cond = (this->polygon->x >= x_min && \
-                     this->polygon->x <= x_max && rect_distance == 0);
+    /**
+     * @brief
+     */
+    void set_bounds(int x, int y) {
+        polygon->x = x;
+        polygon->y = y;
+    }
 
-        return cond;
+    /**
+     * @brief
+     */
+    std::pair<int, int> get_dimension() {
+        return std::make_pair(polygon->w, polygon->h);
+    }
+
+    /**
+     * @brief
+     */
+    void set_dimension(int w, int h) {
+        polygon->w = w;
+        polygon->h = h;
     }
 };
 
