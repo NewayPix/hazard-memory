@@ -4,7 +4,7 @@
 
 #include <SDL2/SDL.h>
 
-#include "Vector2D.hpp"
+#include "math/Vector2.hpp"
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
@@ -25,8 +25,8 @@ struct KeyboardState {
 };
 
 struct Player {
-    Vector2D position = {0, 0};
-    Vector2D direction = {0, 0};
+    Vector2 position = {0, 0};
+    Vector2 direction = {0, 0};
     int size = 50;
     SDL_Rect rect = {0, 0, size, size};
     float velocity = 300;
@@ -37,7 +37,7 @@ struct Player {
     }
 
     float cos_direction() {
-        Vector2D unit_vector(1, 0);
+        Vector2 unit_vector(1, 0);
         return direction.cos(unit_vector);
     }
 
