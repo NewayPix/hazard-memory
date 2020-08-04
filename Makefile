@@ -1,9 +1,9 @@
 CXX = g++
 SRC_DIR = src
-INCLUDES = $(shell pkg-config --cflags sdl2) -I $(SRC_DIR)
+INCLUDES = $(shell pkg-config --cflags sdl2) -I  $(shell find $(SRC_DIR) -maxdepth 1 -type d)
 CXXFLAGS = -w $(INCLUDES) -g -Wall -Wextra -Werror
 LFLAGS = -lSDL2 -lm
-SRCS = $(wildcard $(SRC_DIR)/*.cpp)
+SRCS = $(shell find $(SRC_DIR) -name "*.cpp" -type f)
 TESTS = $(wildcard tests/*.cpp)
 EXAMPLES = $(wildcard examples/*.cpp)
 RUN_EXAMPLE=1
@@ -54,6 +54,7 @@ vars:
 	@echo CXX      = $(CXX)
 	@echo CXXFLAGS = $(CXXFLAGS)
 	@echo LFLAGS   = $(LFLAGS)
+	@echo INCLUDES = $(INCLUDES)
 	@echo SRC_DIR  = $(SRC_DIR)
 	@echo SRCS     = $(SRCS)
 	@echo OBJS     = $(OBJS)
