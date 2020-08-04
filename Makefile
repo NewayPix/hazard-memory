@@ -1,6 +1,6 @@
 CXX = g++
 SRC_DIR = src
-INCLUDES = $(shell pkg-config --cflags sdl2) -I  $(shell find $(SRC_DIR) -maxdepth 1 -type d)
+INCLUDES = $(shell pkg-config --cflags sdl2) -I  $(SRC_DIR)
 CXXFLAGS = -w $(INCLUDES) -g -Wall -Wextra -Werror
 LFLAGS = -lSDL2 -lm
 SRCS = $(shell find $(SRC_DIR) -name "*.cpp" -type f)
