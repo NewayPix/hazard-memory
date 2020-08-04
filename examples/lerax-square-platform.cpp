@@ -6,8 +6,8 @@
 #include <chrono>
 
 #include <SDL2/SDL.h>
-#include "Vector2D.hpp"
-#include "Collision.hpp"
+#include "math/Vector2.hpp"
+#include "collider/ColliderRect.hpp"
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
@@ -31,36 +31,33 @@ struct KeyboardState {
 };
 
 struct Player {
-    Vector2D position = {0, 0};
-    Vector2D direction = {0, 0};
-    Vector2D velocity = {300, 0};
+    Vector2 position = {0, 0};
+    Vector2 direction = {0, 0};
+    Vector2 velocity = {300, 0};
     int size = 50;
-    SDL_Rect rect = {0, 0, size, size};
+
+    ColliderRect collider = ColliderRect(0, 0, size, size);
 
     void set_size(int size) {
         position.x += (this->size - size);
         position.y += (this->size - size);
         this->size = size;
-        rect.w = size;
-        rect.h = size;
 
+        // update player's collider
+        collider = ColliderRect(0, 0, size, size);
     }
 
     SDL_Rect current_rect() {
-        SDL_Rect player = {(int)round(position.x), (int)round(position.y),
-                           rect.w, rect.h};
-        return player;
+        return *(collider.polygon);
     }
 
     /*
      * Check if the player is on top of some block
      */
     bool on_ground(vector<SDL_Rect> &blocks) {
-        SDL_Rect player = current_rect();
         for (auto block: blocks) {
-            if (Collision::rect_on_top(player, block)) {
-                return true;
-            }
+            ColliderRect c(block.x, block.y, block.w, block.h);
+            return collider.on_top(c);
         }
 
         return false;
@@ -70,25 +67,22 @@ struct Player {
      * Check if the player collides with some block
      */
     bool collision(vector<SDL_Rect> &blocks) {
-        SDL_Rect player = current_rect();
         for (auto block: blocks) {
-            if (Collision::rect(player, block)) {
-                return true;
-            }
+            ColliderRect c(block.x, block.y, block.w, block.h);
+            return collider.collide(c);
         }
 
         return false;
     }
 
     void reset_to_last_position() {
-        position.x = rect.x;
-        position.y = rect.y;
+        position.x = collider.get_bounds().first;
+        position.y = collider.get_bounds().second;
         velocity.y = 0;
     }
 
     void update_rect() {
-        rect.x = round(position.x);
-        rect.y = round(position.y);
+        collider = ColliderRect(position.x, position.y, size, size);
     }
 
     void set_direction(struct KeyboardState *k) {
@@ -97,7 +91,7 @@ struct Player {
     }
 
     float cos_direction() {
-        Vector2D unit_vector(1, 0);
+        Vector2 unit_vector(1, 0);
         return direction.cos(unit_vector);
     }
 
@@ -115,7 +109,7 @@ struct Player {
         }
     }
 
-    void move(float dt, Vector2D velocity) {
+    void move(float dt, Vector2 velocity) {
         position.x += cos_direction() * velocity.x * dt;
         //position.y += sin_direction() * velocity.x * dt;
     }
@@ -250,7 +244,7 @@ private:
             player.reset_to_last_position();
         } else {
             // player movement
-            Vector2D copy_position(player.position);
+            Vector2 copy_position(player.position);
             if (keyboard.valid_move()) {
                 player.set_direction(&keyboard);
                 player.move(dt, keyboard.run);
@@ -270,8 +264,7 @@ private:
             if (squares_shadow.size() > squares_max) {
                 squares_shadow.pop_front();
             } else {
-                SDL_Rect rect = {player.rect.x, player.rect.y,
-                                 player.size, player.size};
+                SDL_Rect rect = *(player.collider.polygon);
                 squares_shadow.push_back(rect);
             }
         }
