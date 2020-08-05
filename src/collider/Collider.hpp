@@ -13,15 +13,10 @@ public:
     // constructor
     Vector2 center;
     // The polygon is the surface on which
-    SDL_Rect *polygon;
-
-public:
-    Collider(SDL_Rect *r);
-    Collider(int x, int y, int w, int h);
-    virtual ~Collider();
+    SDL_Rect polygon;
 
     /**
-     * @brief
+     * @brief abstract collide method
      */
     virtual bool collide(const Collider &c) = 0;
 };

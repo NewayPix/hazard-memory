@@ -1,15 +1,18 @@
-CXX = g++
-SRC_DIR = src
-INCLUDES = $(shell pkg-config --cflags sdl2) -I  $(SRC_DIR)
-CXXFLAGS = -w $(INCLUDES) -g -Wall -Wextra -Werror
-LFLAGS = -lSDL2 -lm
-SRCS = $(shell find $(SRC_DIR) -name "*.cpp" -type f)
-TESTS = $(wildcard tests/*.cpp)
-EXAMPLES = $(wildcard examples/*.cpp)
-RUN_EXAMPLE=1
-TESTS_OBJS = $(TESTS:%.cpp=%.bin)
-OBJS = $(SRCS:%.cpp=%.o)
-BIN_NAME = hazard-memory.bin
+CXX         = g++
+SRC_DIR     = src
+INCLUDES    = $(shell pkg-config --cflags sdl2) -I  $(SRC_DIR)
+CXXFLAGS    = -w $(INCLUDES) -g -Wall -Wextra -Werror -DDEBUG
+LFLAGS      = -lSDL2 -lm
+MAIN        = $(SRC_DIR)/main.cpp
+SRCS        = $(shell find $(SRC_DIR) -name "*.cpp" -type f)
+LIB_SRCS    = $(filter-out $(MAIN), $(SRCS))
+TESTS       = $(wildcard tests/*.cpp)
+EXAMPLES    = $(wildcard examples/*.cpp)
+RUN_EXAMPLE = 1
+LIB_OBJS    = $(LIB_SRCS:%.cpp=%.o)
+TESTS_OBJS  = $(TESTS:%.cpp=%.bin)
+OBJS        = $(SRCS:%.cpp=%.o)
+BIN_NAME    = hazard-memory.bin
 
 
 all: $(OBJS)
@@ -20,8 +23,8 @@ all: $(OBJS)
 
 # running examples easily
 FORCE:
-examples/%.cpp: FORCE
-	$(CXX) $@ $(CXXFLAGS) $(LFLAGS) -o $(@:%.cpp=%.bin)
+examples/%.cpp: $(LIB_OBJS) FORCE
+	$(CXX) $(LIB_OBJS) $@ $(CXXFLAGS) $(LFLAGS) -o $(@:%.cpp=%.bin)
 	$(if $(RUN_EXAMPLE), ./$(@:%.cpp=%.bin))
 
 examples: $(EXAMPLES)
@@ -37,10 +40,9 @@ check:
 	@echo "-- Compile main project"
 	@make
 
-tests/%.bin: tests/%.cpp
-	@$(CXX) $(LFLAGS) $(CXXFLAGS) $< -o $@
+tests/%.bin: tests/%.cpp $(LIB_OBJS)
+	$(CXX) $(LFLAGS) $(CXXFLAGS) $(LIB_OBJS) $< -o $@
 	@./$@
-	@rm -f $@
 	@echo -- $< [ok]
 
 run: all
@@ -48,6 +50,9 @@ run: all
 
 clean:
 	find . -iname '*.o' -or -iname '*.bin' | xargs rm -fv
+
+tags:
+	find . -type f -name "*.*pp" | xargs etags -a
 
 # for debug purposes
 vars:
@@ -57,8 +62,11 @@ vars:
 	@echo INCLUDES = $(INCLUDES)
 	@echo SRC_DIR  = $(SRC_DIR)
 	@echo SRCS     = $(SRCS)
+	@echo EXAMPLES = $(EXAMPLES)
+	@echo LIB_SRCS = $(LIB_SRCS)
+	@echo LIB_OBJS = $(LIB_OBJS)
 	@echo OBJS     = $(OBJS)
 	@echo BIN_NAME = $(BIN_NAME)
 
 
-.PHONY: vars
+.PHONY: vars tags
