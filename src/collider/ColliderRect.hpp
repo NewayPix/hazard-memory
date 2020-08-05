@@ -7,6 +7,7 @@
 
 class ColliderRect : public Collider {
 public:
+    SDL_Rect polygon;
     ColliderRect(SDL_Rect const &r);
     ColliderRect(int x, int y, int w, int h);
 
@@ -20,5 +21,6 @@ public:
       */
     bool on_top(const ColliderRect &c);
 
+    Vector2 radius() const;
 };
 #endif //COLLIDER_RECT_H

@@ -7,7 +7,7 @@ ColliderRect::ColliderRect(int x, int y, int w, int h) {
     polygon.w = w;
     polygon.h = h;
 
-    center = Vector2(x + w/2, round(y + h/2));
+    center = Vector2(x + w/2, y + h/2);
 }
 
 
@@ -25,11 +25,13 @@ bool ColliderRect::on_top(const ColliderRect &c) {
 }
 
 bool ColliderRect::collide(const Collider &c) {
-
-    float x_max = (this->polygon.w + c.polygon.w) / 2;
-    float y_max = (this->polygon.h + c.polygon.h) / 2;
-
+    Vector2 radius = this->radius() + c.radius();
     Vector2 diff = this->center - c.center;
 
-    return abs(diff.x) < x_max && abs(diff.y) < y_max;
+    return abs(diff.x) < radius.x && abs(diff.y) < radius.y;
+}
+
+
+Vector2 ColliderRect::radius() const {
+    return Vector2(polygon.w / 2, polygon.h / 2);
 }
