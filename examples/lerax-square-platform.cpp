@@ -6,8 +6,11 @@
 #include <chrono>
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL2_gfxPrimitives.h>
+
 #include "math/Vector2.hpp"
 #include "collider/ColliderRect.hpp"
+#include "collider/ColliderCircle.hpp"
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
@@ -57,11 +60,10 @@ struct Player {
     /*
      * Check if the player is on top of some block
      */
-    bool on_ground(vector<SDL_Rect> &blocks) {
+    bool on_ground(vector<ColliderRect> &blocks) {
         ColliderRect player_collider = current_collider();
         for (auto block: blocks) {
-            ColliderRect c(block);
-            if (player_collider.on_top(c)) {
+            if (player_collider.on_top(block)) {
                 return true;
             }
         }
@@ -72,11 +74,11 @@ struct Player {
     /*
      * Check if the player collides with some block
      */
-    bool collision(vector<SDL_Rect> &blocks) {
+    template<typename T>
+    bool collision(vector<T> &blocks) {
         ColliderRect player_collider = current_collider();
         for (auto block: blocks) {
-            ColliderRect c(block);
-            if (player_collider.collide(c)) {
+            if (player_collider.collide(block)) {
                 return true;
             }
         }
@@ -141,7 +143,8 @@ private:
     struct Player player = {};
     struct KeyboardState keyboard = {};
     deque<SDL_Rect> squares_shadow;
-    vector<SDL_Rect> blocks;
+    vector<ColliderRect> blocks;
+    vector<ColliderCircle> circles;
     unsigned int squares_max = 50; /* Max size of squares_shadow container */
     unsigned long frames = 0;
 
@@ -249,7 +252,7 @@ private:
         }
 
         // collision detection
-        if (player.collision(blocks)) {
+        if (player.collision(blocks) || player.collision(circles)) {
             player.reset_to_last_position();
         } else {
             // player movement
@@ -258,7 +261,7 @@ private:
                 player.set_direction(&keyboard);
                 player.move(dt, keyboard.run);
             }
-            if (player.collision(blocks))  {
+            if (player.collision(blocks) || player.collision(circles))  {
                 player.position = copy_position;
             }
 
@@ -297,7 +300,12 @@ private:
         // platform blocks
         for(auto b: blocks) {
             SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-            SDL_RenderDrawRect(renderer, &b);
+            SDL_RenderDrawRect(renderer, &b.polygon);
+        }
+
+        for(auto c: circles) {
+            filledCircleRGBA(renderer, c.center.x, c.center.y, c.circle.radius,
+                             0, 0, 0, 255);
         }
 
         // render everything
@@ -336,16 +344,19 @@ private:
                            .w=2*block_size,
                            .h=block_size};
 
-        blocks.push_back(floor);
-        blocks.push_back(left_wall);
-        blocks.push_back(right_wall);
-        blocks.push_back(ceil);
-        blocks.push_back(block1);
-        blocks.push_back(block2);
-        blocks.push_back(block3);
-        blocks.push_back(block4);
-        blocks.push_back(block5);
-        blocks.push_back(block6);
+        blocks.push_back(ColliderRect(floor));
+        blocks.push_back(ColliderRect(left_wall));
+        blocks.push_back(ColliderRect(right_wall));
+        blocks.push_back(ColliderRect(ceil));
+        blocks.push_back(ColliderRect(block1));
+        blocks.push_back(ColliderRect(block2));
+        blocks.push_back(ColliderRect(block3));
+        blocks.push_back(ColliderRect(block4));
+        blocks.push_back(ColliderRect(block5));
+        blocks.push_back(ColliderRect(block6));
+
+        circles.push_back(ColliderCircle(Vector2(200, 150), 30));
+        circles.push_back(ColliderCircle(Vector2(600, 350), 30));
 
     }
 
