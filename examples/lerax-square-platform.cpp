@@ -44,20 +44,26 @@ struct Player {
         this->size = size;
 
         // update player's collider
-        collider = ColliderRect(0, 0, size, size);
+        collider = ColliderRect(position.x, position.y, size, size);
     }
 
-    SDL_Rect current_rect() {
-        return *(collider.polygon);
+    ColliderRect current_collider() {
+        return ColliderRect(round(position.x),
+                            round(position.y),
+                            collider.polygon.w,
+                            collider.polygon.h);
     }
 
     /*
      * Check if the player is on top of some block
      */
     bool on_ground(vector<SDL_Rect> &blocks) {
+        ColliderRect player_collider = current_collider();
         for (auto block: blocks) {
-            ColliderRect c(block.x, block.y, block.w, block.h);
-            return collider.on_top(c);
+            ColliderRect c(block);
+            if (player_collider.on_top(c)) {
+                return true;
+            }
         }
 
         return false;
@@ -67,22 +73,25 @@ struct Player {
      * Check if the player collides with some block
      */
     bool collision(vector<SDL_Rect> &blocks) {
+        ColliderRect player_collider = current_collider();
         for (auto block: blocks) {
-            ColliderRect c(block.x, block.y, block.w, block.h);
-            return collider.collide(c);
+            ColliderRect c(block);
+            if (player_collider.collide(c)) {
+                return true;
+            }
         }
 
         return false;
     }
 
     void reset_to_last_position() {
-        position.x = collider.get_bounds().first;
-        position.y = collider.get_bounds().second;
+        position.x = collider.polygon.x;
+        position.y = collider.polygon.y;
         velocity.y = 0;
     }
 
     void update_rect() {
-        collider = ColliderRect(position.x, position.y, size, size);
+        collider = current_collider();
     }
 
     void set_direction(struct KeyboardState *k) {
@@ -264,8 +273,7 @@ private:
             if (squares_shadow.size() > squares_max) {
                 squares_shadow.pop_front();
             } else {
-                SDL_Rect rect = *(player.collider.polygon);
-                squares_shadow.push_back(rect);
+                squares_shadow.push_back(player.collider.polygon);
             }
         }
 
