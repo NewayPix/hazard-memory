@@ -13,16 +13,6 @@ ColliderCircle::ColliderCircle(Vector2 center, int radius) {
 Vector2 ColliderCircle::radius() {
     return Vector2(circle.radius, circle.radius);
 }
-// return the nearest value of c in (min, max) range.
-float range(float c, float min, float max) {
-    if (c < min) {
-        return min;
-    } else if (c > max) {
-        return max;
-    } else {
-        return c;
-    }
-}
 
 bool ColliderCircle::collide(Collider *c) {
     // special colllision if Collider it's actually ColliderRect

@@ -1,4 +1,7 @@
 #include "collider/ColliderRect.hpp"
+#include "collider/ColliderCircle.hpp"
+#include <vector>
+
 ColliderRect::ColliderRect(SDL_Rect const &r): ColliderRect(r.x, r.y, r.w, r.h) {}
 
 ColliderRect::ColliderRect(int x, int y, int w, int h) {
@@ -12,18 +15,31 @@ ColliderRect::ColliderRect(int x, int y, int w, int h) {
 
 
 bool ColliderRect::on_top(Collider *c) {
-    Vector2 r1 = this->radius();
-    Vector2 v1 = this->center - r1;
-    Vector2 r2 = c->radius();
-    Vector2 v2 = c->center - r2;
-    float distance = v2.y - (v1.y + 2 * r1.y);
+    // special logic for ColliderCircle
+    bool cond = false;
+    if (dynamic_cast<ColliderCircle*>(c)) {
+        Vector2 ct = this->center;
+        Vector2 r  = this->radius();
+        Vector2 min = ct - r;
+        Vector2 max = ct + r;
+        float nearest_x = range(c->center.x, min.x, max.x);
+        Vector2 boundary = Vector2(nearest_x, max.y); // bottom;
+        float distance = c->center.distance(boundary);
+        cond = (distance - c->radius().max()) < 1;
+    } else { // default on_top behavior
+        Vector2 r1 = this->radius();
+        Vector2 v1 = this->center - r1;
+        Vector2 r2 = c->radius();
+        Vector2 v2 = c->center - r2;
+        float distance = v2.y - (v1.y + 2 * r1.y);
 
-    int x_min = v2.x - 2 * r1.x;
-    int x_max = v2.x +  2 * r2.x;
+        int x_min = v2.x - 2 * r1.x;
+        int x_max = v2.x +  2 * r2.x;
 
-    bool cond = (v1.x >= x_min && \
-                 v1.x <= x_max && \
-                 distance == 0);
+        cond = (v1.x >= x_min && \
+                v1.x <= x_max && \
+                distance == 0);
+    }
 
     return cond;
 }

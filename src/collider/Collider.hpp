@@ -21,4 +21,15 @@ public:
     virtual Vector2 radius() = 0;
 };
 
+// return the nearest value of c in (min, max) range.
+inline float range(float c, float min, float max) {
+    if (c < min) {
+        return min;
+    } else if (c > max) {
+        return max;
+    } else {
+        return c;
+    }
+}
+
 #endif //COLLISION_HPP
