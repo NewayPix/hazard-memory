@@ -11,27 +11,31 @@ ColliderRect::ColliderRect(int x, int y, int w, int h) {
 }
 
 
-bool ColliderRect::on_top(const ColliderRect &c) {
-    float rect_distance = c.polygon.y - (this->polygon.y + this->polygon.h);
+bool ColliderRect::on_top(Collider *c) {
+    Vector2 r1 = this->radius();
+    Vector2 v1 = this->center - r1;
+    Vector2 r2 = c->radius();
+    Vector2 v2 = c->center - r2;
+    float distance = v2.y - (v1.y + 2 * r1.y);
 
-    int x_min = c.polygon.x - this->polygon.w;
-    int x_max = c.polygon.x + c.polygon.w;
+    int x_min = v2.x - 2 * r1.x;
+    int x_max = v2.x +  2 * r2.x;
 
     bool cond = (this->polygon.x >= x_min && \
                  this->polygon.x <= x_max && \
-                 rect_distance == 0);
+                 distance == 0);
 
     return cond;
 }
 
-bool ColliderRect::collide(const Collider &c) {
-    Vector2 radius = this->radius() + c.radius();
-    Vector2 diff = this->center - c.center;
+bool ColliderRect::collide(Collider *c) {
+    Vector2 radius = this->radius() + c->radius();
+    Vector2 diff = this->center - c->center;
 
     return abs(diff.x) < radius.x && abs(diff.y) < radius.y;
 }
 
 
-Vector2 ColliderRect::radius() const {
+Vector2 ColliderRect::radius() {
     return Vector2(polygon.w / 2, polygon.h / 2);
 }

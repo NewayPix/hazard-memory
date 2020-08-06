@@ -9,12 +9,12 @@ ColliderCircle::ColliderCircle(Vector2 center, int radius) {
 }
 
 
-Vector2 ColliderCircle::radius() const {
+Vector2 ColliderCircle::radius() {
     return Vector2(circle.radius, circle.radius);
 }
 
-bool ColliderCircle::collide(const Collider &c) {
-    float distance = this->center.distance(c.center);
-    float radius_sum = (this->radius() + c.radius()).norm();
+bool ColliderCircle::collide(Collider *c) {
+    float distance = this->center.distance(c->center);
+    float radius_sum = (this->radius().max() + c->radius().max());
     return distance < radius_sum;
 }

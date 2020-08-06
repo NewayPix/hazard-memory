@@ -13,9 +13,9 @@ public:
     /**
      * @brief checks if the current collider is intersecting another one.
      */
-    bool collide(const Collider &c);
+    bool collide(Collider *c);
 
 
-    Vector2 radius() const;
+    Vector2 radius();
 };
 #endif //COLLIDER_RECT_H

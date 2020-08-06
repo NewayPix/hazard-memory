@@ -47,17 +47,17 @@ int main(void) {
     ColliderRect c3(r3);
 
     // Test on_top method from ColliderRect
-    assert(c1.on_top(c2));
-    assert(!c1.on_top(c3));
-    assert(!c2.on_top(c1));
-    assert(!c2.on_top(c3));
-    assert(!c3.on_top(c1));
-    assert(!c3.on_top(c2));
+    assert(c1.on_top(&c2));
+    assert(!c1.on_top(&c3));
+    assert(!c2.on_top(&c1));
+    assert(!c2.on_top(&c3));
+    assert(!c3.on_top(&c1));
+    assert(!c3.on_top(&c2));
 
     // Test collision between two rects
-    assert(c2.collide(c3));
-    assert(!c1.collide(c2));
-    assert(!c1.collide(c3));
+    assert(c2.collide(&c3));
+    assert(!c1.collide(&c2));
+    assert(!c1.collide(&c3));
 
     return 0;
 }

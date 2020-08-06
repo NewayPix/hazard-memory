@@ -13,12 +13,12 @@ public:
     /**
      * @brief abstract collide method
      */
-    virtual bool collide(const Collider &c) = 0;
+    virtual bool collide(Collider *c) = 0;
 
     /**
      * @brief return the object radius
      */
-    virtual Vector2 radius() const = 0;
+    virtual Vector2 radius() = 0;
 };
 
 #endif //COLLISION_HPP

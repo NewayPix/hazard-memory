@@ -60,10 +60,10 @@ struct Player {
     /*
      * Check if the player is on top of some block
      */
-    bool on_ground(vector<ColliderRect> &blocks) {
+    bool on_ground(vector<Collider*> &colliders) {
         ColliderRect player_collider = current_collider();
-        for (auto block: blocks) {
-            if (player_collider.on_top(block)) {
+        for (auto collider: colliders) {
+            if (player_collider.on_top(collider)) {
                 return true;
             }
         }
@@ -74,11 +74,10 @@ struct Player {
     /*
      * Check if the player collides with some block
      */
-    template<typename T>
-    bool collision(vector<T> &blocks) {
+    bool collision(vector<Collider*> &colliders) {
         ColliderRect player_collider = current_collider();
-        for (auto block: blocks) {
-            if (player_collider.collide(block)) {
+        for (auto collider: colliders) {
+            if (collider->collide(&player_collider)) {
                 return true;
             }
         }
@@ -145,6 +144,7 @@ private:
     deque<SDL_Rect> squares_shadow;
     vector<ColliderRect> blocks;
     vector<ColliderCircle> circles;
+    vector<Collider*> colliders;
     unsigned int squares_max = 50; /* Max size of squares_shadow container */
     unsigned long frames = 0;
 
@@ -214,8 +214,8 @@ private:
             cout << "Player position: \t" << string(player.position) << endl;
             cout << "Player velocity: \t" << string(player.velocity) << endl;
             cout << "            FPS: \t" << frames - lastFrames << endl;
-            cout << "      on ground: \t" << player.on_ground(blocks) << endl;
-            cout << "      collision: \t" << player.collision(blocks) << endl;
+            cout << "      on ground: \t" << player.on_ground(colliders) << endl;
+            cout << "      collision: \t" << player.collision(colliders) << endl;
             cout << fixed;
             cout.precision(7);
             cout << "             dt: \t" << dt << "s" << endl;
@@ -243,7 +243,7 @@ private:
             keyboard.velocity_down = false;
         }
         // gravity velocity
-        if (player.on_ground(blocks)) {
+        if (player.on_ground(colliders)) {
             player.velocity.y = 0;
             player.try_jump(dt);
         } else {
@@ -252,7 +252,7 @@ private:
         }
 
         // collision detection
-        if (player.collision(blocks) || player.collision(circles)) {
+        if (player.collision(colliders)) {
             player.reset_to_last_position();
         } else {
             // player movement
@@ -261,7 +261,7 @@ private:
                 player.set_direction(&keyboard);
                 player.move(dt, keyboard.run);
             }
-            if (player.collision(blocks) || player.collision(circles))  {
+            if (player.collision(colliders))  {
                 player.position = copy_position;
             }
 
@@ -357,6 +357,14 @@ private:
 
         circles.push_back(ColliderCircle(Vector2(200, 150), 30));
         circles.push_back(ColliderCircle(Vector2(600, 350), 30));
+
+        for(auto &b: blocks) {
+            colliders.push_back(&b);
+        }
+
+        for(auto &c: circles) {
+            colliders.push_back(&c);
+        }
 
     }
 
