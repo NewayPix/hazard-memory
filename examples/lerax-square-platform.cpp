@@ -355,8 +355,9 @@ private:
         blocks.push_back(ColliderRect(block5));
         blocks.push_back(ColliderRect(block6));
 
-        circles.push_back(ColliderCircle(Vector2(200, 150), 30));
-        circles.push_back(ColliderCircle(Vector2(600, 350), 30));
+        float radius = 50;
+        circles.push_back(ColliderCircle(Vector2(200, 150), radius));
+        circles.push_back(ColliderCircle(Vector2(600, 350), radius));
 
         for(auto &b: blocks) {
             colliders.push_back(&b);
@@ -365,6 +366,8 @@ private:
         for(auto &c: circles) {
             colliders.push_back(&c);
         }
+        blocks.push_back(ColliderRect(200-radius,150-radius, radius*2, radius*2));
+        blocks.push_back(ColliderRect(600-radius,350-radius, radius*2, radius*2));
 
     }
 

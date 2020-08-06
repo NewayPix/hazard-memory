@@ -21,13 +21,16 @@ bool ColliderRect::on_top(Collider *c) {
     int x_min = v2.x - 2 * r1.x;
     int x_max = v2.x +  2 * r2.x;
 
-    bool cond = (this->polygon.x >= x_min && \
-                 this->polygon.x <= x_max && \
+    bool cond = (v1.x >= x_min && \
+                 v1.x <= x_max && \
                  distance == 0);
 
     return cond;
 }
 
+/*
+ * Equation: abs(c1 - c2) < (r1 + r2)
+ */
 bool ColliderRect::collide(Collider *c) {
     Vector2 radius = this->radius() + c->radius();
     Vector2 diff = this->center - c->center;
