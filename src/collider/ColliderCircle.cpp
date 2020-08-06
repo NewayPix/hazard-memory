@@ -16,6 +16,7 @@ Vector2 ColliderCircle::radius() {
 
 bool ColliderCircle::collide(Collider *c) {
     // special colllision if Collider it's actually ColliderRect
+    bool cond = false;
     if (dynamic_cast<ColliderRect*>(c)) {
         Vector2 ct = c->center;
         Vector2 r  = c->radius();
@@ -32,13 +33,13 @@ bool ColliderCircle::collide(Collider *c) {
         for (auto &boundary: boundaries) {
             float distance = this->center.distance(boundary);
             if (distance < this->radius().max()) {
-                return true;
+                cond = true;
             }
         }
-        return false;
     } else {
         float distance = this->center.distance(c->center);
         float radius_sum = this->radius().max() + c->radius().max();
-        return distance < radius_sum;
+        cond = distance < radius_sum;
     }
+    return cond;
 }
