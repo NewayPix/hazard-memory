@@ -41,6 +41,10 @@ public:
         return std::sqrt(d_x * d_x + d_y * d_y);
     }
 
+    float max() {
+        return std::max(x, y);
+    }
+
     /*
      * Vector2D with Vector2D operations
      */

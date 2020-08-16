@@ -13,12 +13,23 @@ public:
     /**
      * @brief abstract collide method
      */
-    virtual bool collide(const Collider &c) = 0;
+    virtual bool collide(Collider *c) = 0;
 
     /**
      * @brief return the object radius
      */
-    virtual Vector2 radius() const = 0;
+    virtual Vector2 radius() = 0;
 };
+
+// return the nearest value of c in (min, max) range.
+inline float range(float c, float min, float max) {
+    if (c < min) {
+        return min;
+    } else if (c > max) {
+        return max;
+    } else {
+        return c;
+    }
+}
 
 #endif //COLLISION_HPP

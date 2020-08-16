@@ -6,8 +6,11 @@
 #include <chrono>
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL2_gfxPrimitives.h>
+
 #include "math/Vector2.hpp"
 #include "collider/ColliderRect.hpp"
+#include "collider/ColliderCircle.hpp"
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
@@ -57,11 +60,10 @@ struct Player {
     /*
      * Check if the player is on top of some block
      */
-    bool on_ground(vector<SDL_Rect> &blocks) {
+    bool on_ground(vector<Collider*> &colliders) {
         ColliderRect player_collider = current_collider();
-        for (auto block: blocks) {
-            ColliderRect c(block);
-            if (player_collider.on_top(c)) {
+        for (auto collider: colliders) {
+            if (player_collider.on_top(collider)) {
                 return true;
             }
         }
@@ -72,11 +74,10 @@ struct Player {
     /*
      * Check if the player collides with some block
      */
-    bool collision(vector<SDL_Rect> &blocks) {
+    bool collision(vector<Collider*> &colliders) {
         ColliderRect player_collider = current_collider();
-        for (auto block: blocks) {
-            ColliderRect c(block);
-            if (player_collider.collide(c)) {
+        for (auto collider: colliders) {
+            if (collider->collide(&player_collider)) {
                 return true;
             }
         }
@@ -141,7 +142,9 @@ private:
     struct Player player = {};
     struct KeyboardState keyboard = {};
     deque<SDL_Rect> squares_shadow;
-    vector<SDL_Rect> blocks;
+    vector<ColliderRect> blocks;
+    vector<ColliderCircle> circles;
+    vector<Collider*> colliders;
     unsigned int squares_max = 50; /* Max size of squares_shadow container */
     unsigned long frames = 0;
 
@@ -211,8 +214,8 @@ private:
             cout << "Player position: \t" << string(player.position) << endl;
             cout << "Player velocity: \t" << string(player.velocity) << endl;
             cout << "            FPS: \t" << frames - lastFrames << endl;
-            cout << "      on ground: \t" << player.on_ground(blocks) << endl;
-            cout << "      collision: \t" << player.collision(blocks) << endl;
+            cout << "      on ground: \t" << player.on_ground(colliders) << endl;
+            cout << "      collision: \t" << player.collision(colliders) << endl;
             cout << fixed;
             cout.precision(7);
             cout << "             dt: \t" << dt << "s" << endl;
@@ -240,7 +243,7 @@ private:
             keyboard.velocity_down = false;
         }
         // gravity velocity
-        if (player.on_ground(blocks)) {
+        if (player.on_ground(colliders)) {
             player.velocity.y = 0;
             player.try_jump(dt);
         } else {
@@ -249,7 +252,7 @@ private:
         }
 
         // collision detection
-        if (player.collision(blocks)) {
+        if (player.collision(colliders)) {
             player.reset_to_last_position();
         } else {
             // player movement
@@ -258,7 +261,7 @@ private:
                 player.set_direction(&keyboard);
                 player.move(dt, keyboard.run);
             }
-            if (player.collision(blocks))  {
+            if (player.collision(colliders))  {
                 player.position = copy_position;
             }
 
@@ -297,7 +300,12 @@ private:
         // platform blocks
         for(auto b: blocks) {
             SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-            SDL_RenderDrawRect(renderer, &b);
+            SDL_RenderDrawRect(renderer, &b.polygon);
+        }
+
+        for(auto c: circles) {
+            filledCircleRGBA(renderer, c.center.x, c.center.y, c.circle.radius,
+                             0, 0, 0, 255);
         }
 
         // render everything
@@ -336,16 +344,30 @@ private:
                            .w=2*block_size,
                            .h=block_size};
 
-        blocks.push_back(floor);
-        blocks.push_back(left_wall);
-        blocks.push_back(right_wall);
-        blocks.push_back(ceil);
-        blocks.push_back(block1);
-        blocks.push_back(block2);
-        blocks.push_back(block3);
-        blocks.push_back(block4);
-        blocks.push_back(block5);
-        blocks.push_back(block6);
+        blocks.push_back(ColliderRect(floor));
+        blocks.push_back(ColliderRect(left_wall));
+        blocks.push_back(ColliderRect(right_wall));
+        blocks.push_back(ColliderRect(ceil));
+        blocks.push_back(ColliderRect(block1));
+        blocks.push_back(ColliderRect(block2));
+        blocks.push_back(ColliderRect(block3));
+        blocks.push_back(ColliderRect(block4));
+        blocks.push_back(ColliderRect(block5));
+        blocks.push_back(ColliderRect(block6));
+
+        float radius = 50;
+        circles.push_back(ColliderCircle(Vector2(200, 150), radius));
+        circles.push_back(ColliderCircle(Vector2(600, 350), radius));
+
+        for(auto &b: blocks) {
+            colliders.push_back(&b);
+        }
+
+        for(auto &c: circles) {
+            colliders.push_back(&c);
+        }
+        blocks.push_back(ColliderRect(200-radius,150-radius, radius*2, radius*2));
+        blocks.push_back(ColliderRect(600-radius,350-radius, radius*2, radius*2));
 
     }
 

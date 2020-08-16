@@ -1,4 +1,7 @@
 #include "collider/ColliderRect.hpp"
+#include "collider/ColliderCircle.hpp"
+#include <vector>
+
 ColliderRect::ColliderRect(SDL_Rect const &r): ColliderRect(r.x, r.y, r.w, r.h) {}
 
 ColliderRect::ColliderRect(int x, int y, int w, int h) {
@@ -11,27 +14,47 @@ ColliderRect::ColliderRect(int x, int y, int w, int h) {
 }
 
 
-bool ColliderRect::on_top(const ColliderRect &c) {
-    float rect_distance = c.polygon.y - (this->polygon.y + this->polygon.h);
+bool ColliderRect::on_top(Collider *c) {
+    // special logic for ColliderCircle
+    bool cond = false;
+    if (dynamic_cast<ColliderCircle*>(c)) {
+        Vector2 ct = this->center;
+        Vector2 r  = this->radius();
+        Vector2 min = ct - r;
+        Vector2 max = ct + r;
+        float nearest_x = range(c->center.x, min.x, max.x);
+        Vector2 boundary = Vector2(nearest_x, max.y); // bottom;
+        float distance = c->center.distance(boundary);
+        cond = (distance - c->radius().max()) < 1;
+    } else { // default on_top behavior
+        Vector2 r1 = this->radius();
+        Vector2 v1 = this->center - r1;
+        Vector2 r2 = c->radius();
+        Vector2 v2 = c->center - r2;
+        float distance = v2.y - (v1.y + 2 * r1.y);
 
-    int x_min = c.polygon.x - this->polygon.w;
-    int x_max = c.polygon.x + c.polygon.w;
+        int x_min = v2.x - 2 * r1.x;
+        int x_max = v2.x +  2 * r2.x;
 
-    bool cond = (this->polygon.x >= x_min && \
-                 this->polygon.x <= x_max && \
-                 rect_distance == 0);
+        cond = (v1.x >= x_min && \
+                v1.x <= x_max && \
+                distance == 0);
+    }
 
     return cond;
 }
 
-bool ColliderRect::collide(const Collider &c) {
-    Vector2 radius = this->radius() + c.radius();
-    Vector2 diff = this->center - c.center;
+/*
+ * Equation: abs(c1 - c2) < (r1 + r2)
+ */
+bool ColliderRect::collide(Collider *c) {
+    Vector2 radius = this->radius() + c->radius();
+    Vector2 diff = this->center - c->center;
 
     return abs(diff.x) < radius.x && abs(diff.y) < radius.y;
 }
 
 
-Vector2 ColliderRect::radius() const {
+Vector2 ColliderRect::radius() {
     return Vector2(polygon.w / 2, polygon.h / 2);
 }

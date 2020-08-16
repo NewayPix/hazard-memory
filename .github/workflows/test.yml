@@ -11,6 +11,6 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Setup SDL2
-      run: sudo apt install libsdl2-dev -y
+      run: sudo apt install libsdl2-dev libsdl2-gfx-dev -y
     - name: Test
       run: make check CXX=${{ matrix.compiler }}
