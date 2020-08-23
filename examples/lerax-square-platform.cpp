@@ -15,6 +15,7 @@
 #include "collider/ColliderScreen.hpp"
 #include "InputHandler.hpp"
 #include "Timer.hpp"
+#include "GameLoop.hpp"
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
@@ -150,12 +151,9 @@ struct Player {
     }
 };
 
-class Game {
+class Game: public GameLoop {
 private:
-    SDL_Window *window = nullptr;
-    SDL_Renderer *renderer = nullptr;
-    const char *title = "Square Moving";
-    bool running = true;
+    using GameLoop::GameLoop;
     struct Player player = {};
     struct KeyboardState keyboard = {};
     ColliderScreen collider_screen = ColliderScreen(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -286,9 +284,14 @@ private:
         SDL_RenderPresent(renderer);
     }
 
-    void init_blocks() {
-        // main floor
+    void start() {
+        cout << ":: Game initialization!" << endl;
+        player.position.x = SCREEN_WIDTH / 2;
+        player.position.y = SCREEN_HEIGHT - player.size;
+        player.update_rect();
+
         int block_size = 50;
+        colliders.push_back(&collider_screen);
         SDL_Rect block1 = {.x=0,
                            .y=SCREEN_HEIGHT-block_size,
                            .w=2*block_size,
@@ -313,7 +316,6 @@ private:
                            .y=SCREEN_HEIGHT-10*block_size,
                            .w=2*block_size,
                            .h=block_size};
-        colliders.push_back(&collider_screen);
 
         blocks.push_back(ColliderRect(block1));
         blocks.push_back(ColliderRect(block2));
@@ -336,68 +338,10 @@ private:
         blocks.push_back(ColliderRect(200-radius,150-radius, radius*2, radius*2));
         blocks.push_back(ColliderRect(600-radius,350-radius, radius*2, radius*2));
     }
-
-public:
-    Game() {
-        cout << ":: Game initialization!" << endl;
-        player.position.x = SCREEN_WIDTH / 2;
-        player.position.y = SCREEN_HEIGHT - player.size;
-        player.update_rect();
-        init_blocks();
-
-        if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-            throw string("SDL could not initialize: ") + SDL_GetError();
-        }
-
-        window = SDL_CreateWindow(title,
-                                  SDL_WINDOWPOS_UNDEFINED,
-                                  SDL_WINDOWPOS_UNDEFINED,
-                                  SCREEN_WIDTH,
-                                  SCREEN_HEIGHT,
-                                  SDL_WINDOW_SHOWN);
-
-        if (window == nullptr) {
-            throw string("window could not be created: ") + SDL_GetError();
-        }
-
-
-        renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-        if (!renderer) {
-            throw string("renderer could not be created: ") + SDL_GetError();
-        }
-
-    }
-
-    ~Game() {
-        cout << ":: Game being destroyed!" << endl;
-        SDL_DestroyRenderer(renderer);
-        renderer = nullptr;
-
-        SDL_DestroyWindow(window);
-        window = nullptr;
-
-        SDL_Quit();
-    }
-
-    void run() {
-        Timer t;
-        do {
-            event();
-            update(t.dt());
-            render();
-        } while(running);
-    }
 };
 
 
 int main(void) {
-    try {
-        Game game;
-        game.run();
-    } catch (string e) {
-        cerr << "[error] " << e << endl;
-        return 1;
-    }
-
-    return 0;
+    Game game("Square Platform", SCREEN_WIDTH, SCREEN_HEIGHT);
+    return game.run();
 }
