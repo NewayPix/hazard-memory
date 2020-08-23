@@ -11,6 +11,7 @@
 #include "math/Vector2.hpp"
 #include "collider/ColliderRect.hpp"
 #include "collider/ColliderCircle.hpp"
+#include "Timer.hpp"
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
@@ -371,19 +372,6 @@ private:
 
     }
 
-    uint64_t tick() {
-        using namespace std::chrono;
-        auto now = high_resolution_clock::now();
-        return duration_cast<microseconds>(now.time_since_epoch()).count();
-    }
-
-    float dt() {
-        static auto clock = tick();
-        float delta = (tick() - clock) / 1000000.0f;
-        clock = tick();
-        return delta;
-    }
-
 public:
     Game() {
         cout << ":: Game initialization!" << endl;
@@ -427,9 +415,10 @@ public:
     }
 
     void run() {
+        Timer t;
         do {
             event();
-            update(dt());
+            update(t.dt());
             render();
         } while(running);
     }
