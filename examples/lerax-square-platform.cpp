@@ -14,7 +14,6 @@
 #include "collider/ColliderCircle.hpp"
 #include "collider/ColliderScreen.hpp"
 #include "InputHandler.hpp"
-#include "Timer.hpp"
 #include "GameLoop.hpp"
 
 #define SCREEN_WIDTH 800
