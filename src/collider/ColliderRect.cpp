@@ -1,5 +1,6 @@
 #include "collider/ColliderRect.hpp"
 #include "collider/ColliderCircle.hpp"
+#include "collider/ColliderScreen.hpp"
 #include <vector>
 
 ColliderRect::ColliderRect(SDL_Rect const &r): ColliderRect(r.x, r.y, r.w, r.h) {}
@@ -26,6 +27,8 @@ bool ColliderRect::on_top(Collider *c) {
         Vector2 boundary = Vector2(nearest_x, max.y); // bottom;
         float distance = c->center.distance(boundary);
         cond = (distance - c->radius().max()) < 1;
+    } if (auto screen = dynamic_cast<ColliderScreen*>(c)) {
+        cond = this->on_top(&screen->bottom);
     } else { // default on_top behavior
         Vector2 r1 = this->radius();
         Vector2 v1 = this->center - r1;

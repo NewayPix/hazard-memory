@@ -11,6 +11,7 @@
 #include "math/Vector2.hpp"
 #include "collider/ColliderRect.hpp"
 #include "collider/ColliderCircle.hpp"
+#include "collider/ColliderScreen.hpp"
 #include "Timer.hpp"
 
 #define SCREEN_WIDTH 800
@@ -142,6 +143,7 @@ private:
     bool running = true;
     struct Player player = {};
     struct KeyboardState keyboard = {};
+    ColliderScreen collider_screen = ColliderScreen(SCREEN_WIDTH, SCREEN_HEIGHT);
     deque<SDL_Rect> squares_shadow;
     vector<ColliderRect> blocks;
     vector<ColliderCircle> circles;
@@ -316,10 +318,6 @@ private:
     void init_blocks() {
         // main floor
         int block_size = 50;
-        SDL_Rect floor = {.x=0, .y=SCREEN_HEIGHT, .w=SCREEN_WIDTH, .h=1};
-        SDL_Rect right_wall = {.x=SCREEN_WIDTH, .y=0, .w=1, .h=SCREEN_HEIGHT};
-        SDL_Rect left_wall = {.x=-1, .y=0, .w=1, .h=SCREEN_HEIGHT};
-        SDL_Rect ceil = {.x=0, .y=-1, .w=SCREEN_WIDTH, .h=1};
         SDL_Rect block1 = {.x=0,
                            .y=SCREEN_HEIGHT-block_size,
                            .w=2*block_size,
@@ -344,11 +342,8 @@ private:
                            .y=SCREEN_HEIGHT-10*block_size,
                            .w=2*block_size,
                            .h=block_size};
+        colliders.push_back(&collider_screen);
 
-        blocks.push_back(ColliderRect(floor));
-        blocks.push_back(ColliderRect(left_wall));
-        blocks.push_back(ColliderRect(right_wall));
-        blocks.push_back(ColliderRect(ceil));
         blocks.push_back(ColliderRect(block1));
         blocks.push_back(ColliderRect(block2));
         blocks.push_back(ColliderRect(block3));
@@ -369,7 +364,6 @@ private:
         }
         blocks.push_back(ColliderRect(200-radius,150-radius, radius*2, radius*2));
         blocks.push_back(ColliderRect(600-radius,350-radius, radius*2, radius*2));
-
     }
 
 public:
