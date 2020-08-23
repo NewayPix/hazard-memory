@@ -4,6 +4,7 @@
 #include <deque>
 #include <vector>
 #include <chrono>
+#include <map>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL2_gfxPrimitives.h>
@@ -12,6 +13,7 @@
 #include "collider/ColliderRect.hpp"
 #include "collider/ColliderCircle.hpp"
 #include "collider/ColliderScreen.hpp"
+#include "InputHandler.hpp"
 #include "Timer.hpp"
 
 #define SCREEN_WIDTH 800
@@ -19,6 +21,19 @@
 #define G 9.8
 
 using namespace std;
+
+
+// keys to InputHandler observe
+std::map<const char*, SDL_Keycode > input_config = {
+    {"quit", SDLK_ESCAPE},
+    {"up", SDLK_UP},
+    {"left", SDLK_LEFT},
+    {"right", SDLK_RIGHT},
+    {"down", SDLK_DOWN},
+    {"velocity_up", SDLK_w},
+    {"velocity_down", SDLK_s},
+    {"run", SDLK_LSHIFT}
+};
 
 struct KeyboardState {
     bool up;
@@ -150,63 +165,19 @@ private:
     vector<Collider*> colliders;
     unsigned int squares_max = 50; /* Max size of squares_shadow container */
     unsigned long frames = 0;
+    InputHandler input_handler = InputHandler(input_config);
 
     void event() {
         static SDL_Event e;
-        while (SDL_PollEvent(&e)) {
-            switch (e.type) {
-            case SDL_QUIT:
-                running = false;
-                break;
-            case SDL_KEYDOWN:
-                switch(e.key.keysym.sym) {
-                case SDLK_ESCAPE:
-                    running = false;
-                    break;
-                case SDLK_UP:
-                    keyboard.up = true;
-                    break;
-                case SDLK_DOWN:
-                    keyboard.down = true;
-                    break;
-                case SDLK_LEFT:
-                    keyboard.left = true;
-                    break;
-                case SDLK_RIGHT:
-                    keyboard.right = true;
-                    break;
-                case SDLK_w:
-                    keyboard.velocity_up = true;
-                    break;
-                case SDLK_s:
-                    keyboard.velocity_down = true;
-                    break;
-                case SDLK_LSHIFT:
-                    keyboard.run = true;
-                    break;
-                }
-                break;
-            case SDL_KEYUP:
-                switch(e.key.keysym.sym) {
-                case SDLK_UP:
-                    keyboard.up = false;
-                    break;
-                case SDLK_DOWN:
-                    keyboard.down = false;
-                    break;
-                case SDLK_LEFT:
-                    keyboard.left = false;
-                    break;
-                case SDLK_RIGHT:
-                    keyboard.right = false;
-                    break;
-                case SDLK_LSHIFT:
-                    keyboard.run = false;
-                    break;
-                }
-                break;
-            }
-        }
+        input_handler.process(e);
+        keyboard.up = input_handler.read("up");
+        keyboard.down = input_handler.read("down");
+        keyboard.left = input_handler.read("left");
+        keyboard.right = input_handler.read("right");
+        keyboard.velocity_up = input_handler.read("velocity_up");
+        keyboard.velocity_down = input_handler.read("velocity_down");
+        keyboard.run = input_handler.read("run");
+        running = !(input_handler.read(SDL_QUIT) || input_handler.read("quit"));
     }
 
     void debug(float dt) {
@@ -235,7 +206,7 @@ private:
         if (keyboard.velocity_up) {
             player.velocity.x += 50;
             player.set_size(player.size + 10);
-            keyboard.velocity_up = false;
+            input_handler.write("velocity_up", false);
         }
 
         if (keyboard.velocity_down) {
@@ -243,7 +214,7 @@ private:
             if (player.velocity.x <= 50) player.velocity.x = 50;
             player.set_size(player.size - 10);
             if (player.size <= 10) player.set_size(10);
-            keyboard.velocity_down = false;
+            input_handler.write("velocity_down", false);
         }
         // gravity velocity
         if (player.on_ground(colliders)) {
