@@ -185,13 +185,14 @@ class Game: public GameLoop {
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         SDL_RenderClear(renderer);
 
+        player.render(renderer);
+        ball.render(renderer);
+
         for(auto &b: blocks) {
             if (b.alive) {
                 b.render(renderer);
             }
         }
-        player.render(renderer);
-        ball.render(renderer);
 
         // render everything
         SDL_RenderPresent(renderer);
