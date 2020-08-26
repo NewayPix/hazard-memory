@@ -6,14 +6,14 @@
 
 #include <SDL2/SDL.h>
 
-#include "Timer.hpp"
+#include "Ticker.hpp"
 
 class GameLoop {
 protected:
     SDL_Window *window = nullptr;
     SDL_Renderer *renderer = nullptr;
     bool running = true;
-    Timer timer;
+    Ticker timer;
     virtual void event() = 0;
     virtual void update(float dt) = 0;
     virtual void render() = 0;

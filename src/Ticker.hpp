@@ -1,15 +1,15 @@
-#ifndef TIMER_HPP
-#define TIMER_HPP
+#ifndef TICKER_HPP
+#define TICKER_HPP
 
 #include <chrono>
 
 /**
  * @brief control the time: tick and delta-time
  */
-class Timer {
+class Ticker {
 public:
 
-    Timer(): last_tick(tick()) {}
+    Ticker(): last_tick(tick()) {}
 
     // tick in microseconds
     uint64_t tick() {
@@ -30,4 +30,4 @@ private:
     uint64_t last_tick;
 };
 
-#endif // TIMER_HPP
+#endif // TICKER_HPP
