@@ -22,11 +22,15 @@ std::map<const char*, SDL_Keycode> input_config = {
     {"left", SDLK_LEFT},
     {"right", SDLK_RIGHT},
     {"quit", SDLK_ESCAPE},
+    {"double_size", SDLK_SPACE},
+    {"run", SDLK_LSHIFT}
 };
 
 struct Keyboard {
     bool left;
     bool right;
+    bool run;
+    bool double_size;
 
     bool valid() {
         return !(left && right);
@@ -37,11 +41,19 @@ struct Player {
     Vector2 position = {SCREEN_WIDTH / 2, SCREEN_HEIGHT - BLOCK_SIZE};
     Vector2 velocity = {500, 0};
     Vector2 direction;
+    bool running;
+    bool double_size;
     ColliderRect collider = {(int)(position.x), (int)position.y,
                              BLOCK_SIZE * 3, BLOCK_SIZE};
 
     void update(float dt) {
-        position.x += velocity.x * direction.x * dt;
+        position.x += (this->running + 1) * velocity.x * direction.x * dt;
+    }
+
+    void read_keyboard(Keyboard &k) {
+        this->direction.x = k.left? -1: k.right? 1: 0;
+        this->double_size = k.double_size;
+        this->running = k.run;
     }
 
     void reset_position() {
@@ -51,13 +63,15 @@ struct Player {
         return ColliderRect(
                round(position.x),
                round(position.y),
-               BLOCK_SIZE * 3,
+               BLOCK_SIZE * 3 * (this->double_size + 1),
                BLOCK_SIZE
             );
     }
 
     void render(SDL_Renderer *renderer) {
-        collider.polygon.x = round(position.x); // IT'S A GOOD IDEA?
+        collider = current_collider();
+        SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
+        SDL_RenderFillRect(renderer, &collider.polygon);
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderDrawRect(renderer, &collider.polygon);
     };
@@ -92,7 +106,13 @@ struct Ball {
                          collider.center.x, \
                          collider.center.y, \
                          collider.circle.radius,
-                         0, 0, 0, 255);
+                         255, 30, 30, 255);
+        circleRGBA(renderer,
+                   collider.center.x,
+                   collider.center.y,
+                   collider.circle.radius,
+                   0, 0, 0, 255);
+
     };
 };
 
@@ -108,9 +128,10 @@ struct Block {
 
 
     void set_color(int i) {
-        color.r = (0x00 | (1 << i));
-        color.g = (0x00 | (1 << i));
-        color.b = (0x00 | (1 << i));
+        int level = (0x0f | (1 << i));
+        color.r = 0.2 * level;
+        color.g = 0.4 * level;
+        color.b = 0.9 * level;
     }
 
     void render(SDL_Renderer *renderer) {
@@ -150,12 +171,14 @@ class Game: public GameLoop {
         input_handler.process(e);
         keyboard.left = input_handler.read("left");
         keyboard.right = input_handler.read("right");
+        keyboard.run = input_handler.read("run");
+        keyboard.double_size = input_handler.read("double_size");
         running = !(input_handler.read("quit") || input_handler.read(SDL_QUIT));
     }
 
     void update(float dt) {
         // update player
-        player.direction.x = keyboard.left? -1: keyboard.right? 1: 0;
+        player.read_keyboard(keyboard);
         player.update(dt);
         ball.update(dt);
 
