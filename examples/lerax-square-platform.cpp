@@ -4,6 +4,7 @@
 #include <deque>
 #include <vector>
 #include <chrono>
+#include <map>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL2_gfxPrimitives.h>
@@ -11,12 +12,28 @@
 #include "math/Vector2.hpp"
 #include "collider/ColliderRect.hpp"
 #include "collider/ColliderCircle.hpp"
+#include "collider/ColliderScreen.hpp"
+#include "InputHandler.hpp"
+#include "GameLoop.hpp"
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
 #define G 9.8
 
 using namespace std;
+
+
+// keys to InputHandler observe
+std::map<const char*, SDL_Keycode > input_config = {
+    {"quit", SDLK_ESCAPE},
+    {"up", SDLK_UP},
+    {"left", SDLK_LEFT},
+    {"right", SDLK_RIGHT},
+    {"down", SDLK_DOWN},
+    {"velocity_up", SDLK_w},
+    {"velocity_down", SDLK_s},
+    {"run", SDLK_LSHIFT}
+};
 
 struct KeyboardState {
     bool up;
@@ -133,77 +150,31 @@ struct Player {
     }
 };
 
-class Game {
+class Game: public GameLoop {
 private:
-    SDL_Window *window = nullptr;
-    SDL_Renderer *renderer = nullptr;
-    const char *title = "Square Moving";
-    bool running = true;
+    using GameLoop::GameLoop;
     struct Player player = {};
     struct KeyboardState keyboard = {};
+    ColliderScreen collider_screen = ColliderScreen(SCREEN_WIDTH, SCREEN_HEIGHT);
     deque<SDL_Rect> squares_shadow;
     vector<ColliderRect> blocks;
     vector<ColliderCircle> circles;
     vector<Collider*> colliders;
     unsigned int squares_max = 50; /* Max size of squares_shadow container */
     unsigned long frames = 0;
+    InputHandler input_handler = InputHandler(input_config);
 
     void event() {
         static SDL_Event e;
-        while (SDL_PollEvent(&e)) {
-            switch (e.type) {
-            case SDL_QUIT:
-                running = false;
-                break;
-            case SDL_KEYDOWN:
-                switch(e.key.keysym.sym) {
-                case SDLK_ESCAPE:
-                    running = false;
-                    break;
-                case SDLK_UP:
-                    keyboard.up = true;
-                    break;
-                case SDLK_DOWN:
-                    keyboard.down = true;
-                    break;
-                case SDLK_LEFT:
-                    keyboard.left = true;
-                    break;
-                case SDLK_RIGHT:
-                    keyboard.right = true;
-                    break;
-                case SDLK_w:
-                    keyboard.velocity_up = true;
-                    break;
-                case SDLK_s:
-                    keyboard.velocity_down = true;
-                    break;
-                case SDLK_LSHIFT:
-                    keyboard.run = true;
-                    break;
-                }
-                break;
-            case SDL_KEYUP:
-                switch(e.key.keysym.sym) {
-                case SDLK_UP:
-                    keyboard.up = false;
-                    break;
-                case SDLK_DOWN:
-                    keyboard.down = false;
-                    break;
-                case SDLK_LEFT:
-                    keyboard.left = false;
-                    break;
-                case SDLK_RIGHT:
-                    keyboard.right = false;
-                    break;
-                case SDLK_LSHIFT:
-                    keyboard.run = false;
-                    break;
-                }
-                break;
-            }
-        }
+        input_handler.process(e);
+        keyboard.up = input_handler.read("up");
+        keyboard.down = input_handler.read("down");
+        keyboard.left = input_handler.read("left");
+        keyboard.right = input_handler.read("right");
+        keyboard.velocity_up = input_handler.read("velocity_up");
+        keyboard.velocity_down = input_handler.read("velocity_down");
+        keyboard.run = input_handler.read("run");
+        running = !(input_handler.read(SDL_QUIT) || input_handler.read("quit"));
     }
 
     void debug(float dt) {
@@ -232,7 +203,7 @@ private:
         if (keyboard.velocity_up) {
             player.velocity.x += 50;
             player.set_size(player.size + 10);
-            keyboard.velocity_up = false;
+            input_handler.write("velocity_up", false);
         }
 
         if (keyboard.velocity_down) {
@@ -240,7 +211,7 @@ private:
             if (player.velocity.x <= 50) player.velocity.x = 50;
             player.set_size(player.size - 10);
             if (player.size <= 10) player.set_size(10);
-            keyboard.velocity_down = false;
+            input_handler.write("velocity_down", false);
         }
         // gravity velocity
         if (player.on_ground(colliders)) {
@@ -312,13 +283,14 @@ private:
         SDL_RenderPresent(renderer);
     }
 
-    void init_blocks() {
-        // main floor
+    void start() {
+        cout << ":: Game initialization!" << endl;
+        player.position.x = SCREEN_WIDTH / 2;
+        player.position.y = SCREEN_HEIGHT - player.size;
+        player.update_rect();
+
         int block_size = 50;
-        SDL_Rect floor = {.x=0, .y=SCREEN_HEIGHT, .w=SCREEN_WIDTH, .h=1};
-        SDL_Rect right_wall = {.x=SCREEN_WIDTH, .y=0, .w=1, .h=SCREEN_HEIGHT};
-        SDL_Rect left_wall = {.x=-1, .y=0, .w=1, .h=SCREEN_HEIGHT};
-        SDL_Rect ceil = {.x=0, .y=-1, .w=SCREEN_WIDTH, .h=1};
+        colliders.push_back(&collider_screen);
         SDL_Rect block1 = {.x=0,
                            .y=SCREEN_HEIGHT-block_size,
                            .w=2*block_size,
@@ -344,10 +316,6 @@ private:
                            .w=2*block_size,
                            .h=block_size};
 
-        blocks.push_back(ColliderRect(floor));
-        blocks.push_back(ColliderRect(left_wall));
-        blocks.push_back(ColliderRect(right_wall));
-        blocks.push_back(ColliderRect(ceil));
         blocks.push_back(ColliderRect(block1));
         blocks.push_back(ColliderRect(block2));
         blocks.push_back(ColliderRect(block3));
@@ -368,82 +336,11 @@ private:
         }
         blocks.push_back(ColliderRect(200-radius,150-radius, radius*2, radius*2));
         blocks.push_back(ColliderRect(600-radius,350-radius, radius*2, radius*2));
-
-    }
-
-    uint64_t tick() {
-        using namespace std::chrono;
-        auto now = high_resolution_clock::now();
-        return duration_cast<microseconds>(now.time_since_epoch()).count();
-    }
-
-    float dt() {
-        static auto clock = tick();
-        float delta = (tick() - clock) / 1000000.0f;
-        clock = tick();
-        return delta;
-    }
-
-public:
-    Game() {
-        cout << ":: Game initialization!" << endl;
-        player.position.x = SCREEN_WIDTH / 2;
-        player.position.y = SCREEN_HEIGHT - player.size;
-        player.update_rect();
-        init_blocks();
-
-        if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-            throw string("SDL could not initialize: ") + SDL_GetError();
-        }
-
-        window = SDL_CreateWindow(title,
-                                  SDL_WINDOWPOS_UNDEFINED,
-                                  SDL_WINDOWPOS_UNDEFINED,
-                                  SCREEN_WIDTH,
-                                  SCREEN_HEIGHT,
-                                  SDL_WINDOW_SHOWN);
-
-        if (window == nullptr) {
-            throw string("window could not be created: ") + SDL_GetError();
-        }
-
-
-        renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-        if (!renderer) {
-            throw string("renderer could not be created: ") + SDL_GetError();
-        }
-
-    }
-
-    ~Game() {
-        cout << ":: Game being destroyed!" << endl;
-        SDL_DestroyRenderer(renderer);
-        renderer = nullptr;
-
-        SDL_DestroyWindow(window);
-        window = nullptr;
-
-        SDL_Quit();
-    }
-
-    void run() {
-        do {
-            event();
-            update(dt());
-            render();
-        } while(running);
     }
 };
 
 
 int main(void) {
-    try {
-        Game game;
-        game.run();
-    } catch (string e) {
-        cerr << "[error] " << e << endl;
-        return 1;
-    }
-
-    return 0;
+    Game game("Square Platform", SCREEN_WIDTH, SCREEN_HEIGHT);
+    return game.run();
 }
