@@ -4,7 +4,6 @@
  *
  *
  */
-#include <iostream>
 #include <SDL2/SDL.h>
 #include "GameLoop.hpp"
 #include "InputHandler.hpp"
@@ -13,11 +12,7 @@
 #define SCREEN_HEIGHT 600
 
 std::map<const char*, SDL_Keycode> input_config = {
-    {"left", SDLK_LEFT},
-    {"right", SDLK_RIGHT},
     {"quit", SDLK_ESCAPE},
-    {"double_size", SDLK_SPACE},
-    {"run", SDLK_LSHIFT}
 };
 
 class Game: public GameLoop {
@@ -26,14 +21,11 @@ class Game: public GameLoop {
 	float screenCounter = 0;
 	int colorCursor = 0;
 	int colors[4][4] = {
-		{224,13 ,0  ,255},
-		{191,247,7  ,97 },
-		{55 ,224,0  ,255},
+		{225,  0,  0,255},
+		{247,227,  0, 97},
+		{25 ,235,  0, 42},
 		{0  ,1  ,224,255}
 	};
-	void start(){
-
-	}
 
 	void event(){
 		static SDL_Event e;
@@ -54,7 +46,7 @@ class Game: public GameLoop {
 
 		if (screenCounter > 2.0f){
 			screenCounter = 0;
- 		  if (colorCursor < 3){
+			if (colorCursor < 3){
 				colorCursor = colorCursor + 1;
 			} else {
 				colorCursor = 0;
