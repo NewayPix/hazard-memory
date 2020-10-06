@@ -21,7 +21,7 @@ class Game: public GameLoop {
 	float screenCounter = 0;
 	int colorCursor = 0;
 	int colors[4][4] = {
-		{225,  0,  0,255},
+		{225,  0,  0,0},
 		{247,227,  0, 97},
 		{25 ,235,  0, 42},
 		{0  ,1  ,224,255}
