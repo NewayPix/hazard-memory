@@ -1,15 +1,29 @@
 #include <iostream>
 #include <cmath>
 #include <string>
+#include <map>
 
 #include <SDL2/SDL.h>
 
 #include "math/Vector2.hpp"
+#include "GameLoop.hpp"
+#include "InputHandler.hpp"
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
 
 using namespace std;
+
+// keys to InputHandler observe
+std::map<const char*, SDL_Keycode> input_config = {
+    {"quit", SDLK_ESCAPE},
+    {"up", SDLK_UP},
+    {"left", SDLK_LEFT},
+    {"right", SDLK_RIGHT},
+    {"down", SDLK_DOWN},
+    {"velocity_up", SDLK_w},
+    {"velocity_down", SDLK_s},
+};
 
 struct KeyboardState {
     bool up;
@@ -53,75 +67,35 @@ struct Player {
     }
 };
 
-class Game {
-private:
-    SDL_Window *window = nullptr;
-    SDL_Renderer *renderer = nullptr;
-    const char *title = "Square Moving";
-    bool running = true;
-    struct Player player;
-    struct KeyboardState keyboard = {};
 
-    void event(SDL_Event *e) {
-        while (SDL_PollEvent(e)) {
-            switch (e->type) {
-            case SDL_QUIT:
-                running = false;
-                break;
-            case SDL_KEYDOWN:
-                switch(e->key.keysym.sym) {
-                case SDLK_ESCAPE:
-                    running = false;
-                    break;
-                case SDLK_UP:
-                    keyboard.up = true;
-                    break;
-                case SDLK_DOWN:
-                    keyboard.down = true;
-                    break;
-                case SDLK_LEFT:
-                    keyboard.left = true;
-                    break;
-                case SDLK_RIGHT:
-                    keyboard.right = true;
-                    break;
-                case SDLK_w:
-                    keyboard.velocity_up = true;
-                    break;
-                case SDLK_s:
-                    keyboard.velocity_down = true;
-                    break;
-                }
-                break;
-            case SDL_KEYUP:
-                switch(e->key.keysym.sym) {
-                case SDLK_UP:
-                    keyboard.up = false;
-                    break;
-                case SDLK_DOWN:
-                    keyboard.down = false;
-                    break;
-                case SDLK_LEFT:
-                    keyboard.left = false;
-                    break;
-                case SDLK_RIGHT:
-                    keyboard.right = false;
-                    break;
-                }
-                break;
-            }
-        }
+class Game: public GameLoop {
+private:
+    using GameLoop::GameLoop;
+    struct Player player = {};
+    struct KeyboardState keyboard = {};
+    InputHandler input_handler = InputHandler(input_config);
+
+    void event() {
+        static SDL_Event e;
+        input_handler.process(e);
+        keyboard.up = input_handler.read("up");
+        keyboard.down = input_handler.read("down");
+        keyboard.left = input_handler.read("left");
+        keyboard.right = input_handler.read("right");
+        keyboard.velocity_up = input_handler.read("velocity_up");
+        keyboard.velocity_down = input_handler.read("velocity_down");
+        running = !(input_handler.read(SDL_QUIT) || input_handler.read("quit"));
     }
 
     void update(float dt) {
         if (keyboard.velocity_up) {
             player.velocity += 50;
-            keyboard.velocity_up = false;
+            input_handler.write("velocity_up", false);
         }
         if (keyboard.velocity_down) {
             player.velocity -= 50;
             if (player.velocity <= 50) player.velocity = 50;
-            keyboard.velocity_down = false;
+            input_handler.write("velocity_down", false);
         }
 
         if (keyboard.valid_move()) {
@@ -157,65 +131,17 @@ private:
         SDL_RenderPresent(renderer);
     }
 
-public:
-    Game() {
+    void start() {
         cout << ":: Game initialization!" << endl;
         player.position.x = SCREEN_WIDTH / 2;
         player.position.y = SCREEN_HEIGHT / 2;
-
-        if(SDL_Init(SDL_INIT_VIDEO) < 0) {
-            throw string("SDL could not initialize: ") + SDL_GetError();
-        }
-        else {
-            window = SDL_CreateWindow(title,
-                                      SDL_WINDOWPOS_UNDEFINED,
-                                      SDL_WINDOWPOS_UNDEFINED,
-                                      SCREEN_WIDTH,
-                                      SCREEN_HEIGHT,
-                                      SDL_WINDOW_SHOWN);
-            if(window == nullptr) {
-                throw string("window could not be created: ") + SDL_GetError();
-            }
-            else {
-                renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-                if (!renderer) {
-                    throw string("renderer could not be created: ") + SDL_GetError();
-                }
-
-            }
-        }
-    }
-
-    ~Game() {
-        cout << ":: Game being destroyed!" << endl;
-        SDL_DestroyRenderer(renderer);
-        renderer = nullptr;
-
-        SDL_DestroyWindow(window);
-        window = nullptr;
-
-        SDL_Quit();
-    }
-
-    float dt(Uint32 clock) {
-        return (SDL_GetTicks() - clock) / 1000.0f;
-    }
-
-    void run() {
-        SDL_Event e;
-        do {
-            Uint32 clock = SDL_GetTicks();
-            event(&e);
-            render();
-            update(dt(clock));
-        } while(running);
     }
 };
 
 
 int main(void) {
     try {
-        Game game;
+        Game game("Square Moving", SCREEN_WIDTH, SCREEN_HEIGHT);
         game.run();
     } catch (string s) {
         cerr << "[error] " << s << endl;
