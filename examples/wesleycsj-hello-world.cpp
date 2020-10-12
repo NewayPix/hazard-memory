@@ -39,11 +39,6 @@ class Game: public GameLoop {
 		screenCounter = screenCounter + dt;
 		int *color = colors[colorCursor];
 
-		//Sets a color in a renderer and render on screen
-		SDL_SetRenderDrawColor(renderer, color[0] , color[1], color[2], color[3]);
-		SDL_RenderClear(renderer);
-		SDL_RenderPresent(renderer);
-
 		if (screenCounter > 2.0f){
 			screenCounter = 0;
 			if (colorCursor < 3){
