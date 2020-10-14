@@ -11,11 +11,12 @@
 
 #include <cstdlib>
 #include <ctime>
-#include <math.h>
+#include <cmath>
 
 #define SCREEN_WIDTH  800
 #define SCREEN_HEIGHT 600
 #define TILESIZE      4
+
 std::map<const char*, SDL_Keycode> input_config = {
     {"quit", SDLK_ESCAPE},
 };
@@ -29,7 +30,7 @@ class Game: public GameLoop {
     int offsetX        = 0;
     int offsetY        = SCREEN_HEIGHT - (heightQuantity * TILESIZE) + 5;
     //int tiles[widthQuantity][heightQuantity];
-    int colors[36][3] = {
+    std::vector<std::array<int, 3>> colors = {
         {0,0,0},
         {31,7,7},
         {47,15,7},
@@ -115,7 +116,7 @@ class Game: public GameLoop {
         return (std::rand() / (double)RAND_MAX);
     }
 
-    int setTileValue(int x, int y, int value){
+    void setTileValue(int x, int y, int value){
         tiles.at((x * heightQuantity) + y) = value;
     }
 
