@@ -28,7 +28,6 @@ class Game: public GameLoop {
   int heightQuantity = 96;
 	int offsetX        = 0;
 	int offsetY        = SCREEN_HEIGHT - (heightQuantity * TILESIZE) + 5;
-	//int tiles[widthQuantity][heightQuantity];
 	int colors[36][3] = {
 		{0,0,0},
 		{31,7,7},                                                                                                                                
@@ -72,7 +71,7 @@ class Game: public GameLoop {
 		for (int i = 0; i < widthQuantity; i++){
 			for (int j = 0; j < heightQuantity; j++){
 				if (j == (heightQuantity - 1)){
-						tiles.push_back(35);
+					tiles.push_back(35);
 				} else {
 					tiles.push_back(0);
 				}
@@ -90,21 +89,21 @@ class Game: public GameLoop {
 
 	void update(float dt) {
 		for (int i = 1; i < (widthQuantity - 1); i++){
-    	for (int j = 1; j < (heightQuantity - 1); j++){		
-					int value = getTileValue(i, (j + 1));
-					double randNumber = sortNumber();
-					int coeficient    = value - floor(randNumber * 3);
-					value =  (coeficient > 0) ? coeficient : 0;
-//					std::cout << value << std::endl;
-					if (randNumber < 0.4){
-						setTileValue((i - 1), j,  value);
-					} else if (randNumber > 0.4 && randNumber <= 0.8){
-						setTileValue((i + 1), j , value);
-					} else {
-						setTileValue(i, (j - 1) , value);
-					}
+			for (int j = 1; j < (heightQuantity - 1); j++){		
+				int value = getTileValue(i, (j + 1));
+				double randNumber = sortNumber();
+				int coeficient    = value - floor(randNumber * 3);
+				value =  (coeficient > 0) ? coeficient : 0;
+				//std::cout << value << std::endl;
+				if (randNumber < 0.4){
+					setTileValue((i - 1), j,  value);
+				} else if (randNumber > 0.4 && randNumber <= 0.8){
+					setTileValue((i + 1), j , value);
+				} else {
+					setTileValue(i, (j - 1) , value);
+				}
 			}
-		}
+		}	
 	}
 	
 	int getTileValue(int x, int y){
@@ -124,16 +123,15 @@ class Game: public GameLoop {
 		SDL_RenderClear(renderer);
 		for (int i = 0; i < widthQuantity; i++){
 			for (int j = 0; j < heightQuantity; j++){		
-			  int tileEl = getTileValue(i, j);	
+				int tileEl = getTileValue(i, j);	
 				SDL_SetRenderDrawColor(renderer, colors[tileEl][0] , colors[tileEl][1], colors[tileEl][2], 255);
 				SDL_Rect rectangle;
-
 				rectangle.x = offsetX + (TILESIZE * i);
 				rectangle.y = offsetY + (TILESIZE * j);
 				rectangle.w = TILESIZE;
 				rectangle.h = TILESIZE;
 				SDL_RenderFillRect(renderer, &rectangle);
-			}                                        		
+			}																							
 		}
 		SDL_SetRenderDrawColor(renderer, 0,0,0,255);
 		SDL_RenderPresent(renderer);
