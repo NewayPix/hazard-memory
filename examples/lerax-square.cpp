@@ -133,6 +133,7 @@ private:
 
     void start() {
         cout << ":: Game initialization!" << endl;
+        fps_target = 60;
         player.position.x = SCREEN_WIDTH / 2;
         player.position.y = SCREEN_HEIGHT / 2;
     }

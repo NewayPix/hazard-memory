@@ -154,6 +154,7 @@ class Game: public GameLoop {
 
     void start() {
         // initialize blocks
+        fps_target = 60;
         ball.velocity = {150, 300};
         for (int i = 0; i < BLOCKS; ++i) {
             for (int j = 0; j < SCREEN_WIDTH / BLOCK_SIZE / 2  ; j++) {

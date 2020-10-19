@@ -288,7 +288,7 @@ private:
         player.position.x = SCREEN_WIDTH / 2;
         player.position.y = SCREEN_HEIGHT - player.size;
         player.update_rect();
-
+        fps_target = 120;
         int block_size = 50;
         colliders.push_back(&collider_screen);
         SDL_Rect block1 = {.x=0,

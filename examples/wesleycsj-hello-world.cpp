@@ -61,5 +61,6 @@ class Game: public GameLoop {
 
 int main(int argc, char** argv){
 	Game game("Hello World", SCREEN_WIDTH, SCREEN_HEIGHT);
+    game.fps_target = 60;
 	return game.run();
 }
