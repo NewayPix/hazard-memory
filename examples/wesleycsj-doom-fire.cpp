@@ -70,6 +70,7 @@ class Game: public GameLoop {
     };
     std::vector<int> tiles;
     void start(){
+        set_max_frame_rate(60);
         for (int i = 0; i < widthQuantity; i++){
             for (int j = 0; j < heightQuantity; j++){
                 if (j == (heightQuantity - 1)){
