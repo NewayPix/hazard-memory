@@ -22,7 +22,11 @@ protected:
     virtual void start() {};
     virtual void stop() {};
 public:
-    int fps_target = 0;
+    int fps_target = 240;
+
+    void set_max_frame_rate(int fps) {
+        this->fps_target = fps;
+    }
 
     GameLoop(const char* title, int width, int height) {
         if (SDL_Init(SDL_INIT_VIDEO) < 0) {
