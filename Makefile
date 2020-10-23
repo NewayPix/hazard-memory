@@ -7,7 +7,7 @@ MAIN        = $(SRC_DIR)/main.cpp
 SRCS        = $(shell find $(SRC_DIR) -name "*.cpp" -type f)
 LIB_SRCS    = $(filter-out $(MAIN), $(SRCS))
 TESTS       = $(wildcard tests/*.cpp)
-EXAMPLES    = $(wildcard examples/*.cpp)
+EXAMPLES    = $(shell find examples -name "*.cpp" -type f)
 RUN_EXAMPLE = 1
 LIB_OBJS    = $(LIB_SRCS:%.cpp=%.o)
 TESTS_OBJS  = $(TESTS:%.cpp=%.bin)
