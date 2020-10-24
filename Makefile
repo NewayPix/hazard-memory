@@ -27,6 +27,9 @@ examples/%.cpp: $(LIB_OBJS) FORCE
 	$(CXX) $(LIB_OBJS) $@ $(CXXFLAGS) $(LFLAGS) -o $(@:%.cpp=%.bin)
 	$(if $(RUN_EXAMPLE), ./$(@:%.cpp=%.bin))
 
+%.bin: FORCE
+	./$@
+
 examples: $(EXAMPLES)
 
 tests: $(TESTS_OBJS)
