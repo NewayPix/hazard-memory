@@ -116,7 +116,7 @@ void Game::update(float dt) {
     }
 }
 
-void Game::render(){
+void Game::draw(){
     //Sets a color in a renderer and render on screen
     SDL_RenderClear(this->renderer);
     for (int i = 0; i < widthQuantity; i++){

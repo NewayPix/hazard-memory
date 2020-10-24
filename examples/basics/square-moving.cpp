@@ -115,7 +115,7 @@ void Game::update(float dt) {
         player.rect.y = round(player.position.y);
     }
 
-void Game::render() {
+void Game::draw() {
         // background
         SDL_SetRenderDrawColor(this->renderer, 255, 255, 255, 255);
         SDL_RenderClear(this->renderer);

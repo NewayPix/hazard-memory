@@ -68,7 +68,7 @@ private:
     Ticker timer;
     void event();
     void update(float dt);
-    void render();
+    void draw();
     int fps_target = 240;
 
     void fps_lock(float dt) {
@@ -87,7 +87,7 @@ private:
         do {
             event();
             update(dt = timer.dt());
-            render();
+            draw();
             fps_lock(dt);
         } while(running);
     }
