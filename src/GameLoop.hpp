@@ -9,23 +9,18 @@
 #include "Ticker.hpp"
 
 class GameLoop {
-protected:
-    SDL_Window *window = nullptr;
-    SDL_Renderer *renderer = nullptr;
-    // int renderer_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
-    int renderer_flags = SDL_RENDERER_ACCELERATED;
-    bool running = true;
-    Ticker timer;
-    virtual void event() = 0;
-    virtual void update(float dt) = 0;
-    virtual void render() = 0;
-    virtual void start() {};
-    virtual void stop() {};
 public:
-    int fps_target = 240;
+    int run() {
+        try {
+            start();
+            loop();
+            stop();
+        } catch (std::string e) {
+            std::cerr << "[error] " << e << std::endl;
+            return 1;
+        }
 
-    void set_max_frame_rate(int fps) {
-        this->fps_target = fps;
+        return 0;
     }
 
     GameLoop(const char* title, int width, int height) {
@@ -62,6 +57,25 @@ public:
         SDL_Quit();
     }
 
+    void set_max_frame_rate(int fps) {
+        this->fps_target = fps;
+    }
+
+protected:
+    SDL_Window *window = nullptr;
+    SDL_Renderer *renderer = nullptr;
+    // int renderer_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
+    int renderer_flags = SDL_RENDERER_ACCELERATED;
+    bool running = true;
+    Ticker timer;
+    virtual void event() = 0;
+    virtual void update(float dt) = 0;
+    virtual void render() = 0;
+    virtual void start() {};
+    virtual void stop() {};
+private:
+    int fps_target = 240;
+
     void fps_lock(float dt) {
         if (fps_target > 0) {
             float ideal_frame_time_ms = 1000.0f/fps_target;
@@ -81,19 +95,6 @@ public:
             render();
             fps_lock(dt);
         } while(running);
-    }
-
-    int run() {
-        try {
-            start();
-            loop();
-            stop();
-        } catch (std::string e) {
-            std::cerr << "[error] " << e << std::endl;
-            return 1;
-        }
-
-        return 0;
     }
 
 };
