@@ -13,4 +13,4 @@ jobs:
     - name: Setup SDL2
       run: sudo apt install libsdl2-dev libsdl2-gfx-dev -y
     - name: Test
-      run: make check CXX=${{ matrix.compiler }}
+      run: make -j 8 check CXX=${{ matrix.compiler }}
