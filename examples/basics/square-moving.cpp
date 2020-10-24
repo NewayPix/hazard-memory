@@ -128,22 +128,17 @@ void Game::render() {
         SDL_RenderPresent(this->renderer);
 }
 
-void Game::start() {
+void start() {
     cout << ":: Game initialization!" << endl;
-    set_max_frame_rate(60);
     player.position.x = SCREEN_WIDTH / 2;
     player.position.y = SCREEN_HEIGHT / 2;
 }
 
 
 int main(void) {
-    try {
-        Game game("Square Moving", SCREEN_WIDTH, SCREEN_HEIGHT);
-        game.run();
-    } catch (string s) {
-        cerr << "[error] " << s << endl;
-        return 1;
-    }
+    start();
+    Game game("Square Moving", SCREEN_WIDTH, SCREEN_HEIGHT);
+    game.set_max_frame_rate(60);
 
-    return 0;
+    return game.run();
 }
