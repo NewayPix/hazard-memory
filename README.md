@@ -3,6 +3,16 @@
 # hazard-memory
 An experimental  SDL2 Platform Game written in C++
 
+# Requirements
+
+- [SDL2]
+- [SDL2_gfx]
+- [g++]
+
+[SDL2]: https://www.libsdl.org/download-2.0.php
+[SDL2_gfx]: https://www.ferzkopp.net/Software/SDL2_gfx/Docs/html/index.html
+[g++]: https://gcc.gnu.org/
+
 # Roadmap
 ## Game Engine
 
