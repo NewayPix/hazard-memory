@@ -32,7 +32,7 @@ sudo pacman -Syu gcc sdl2 sdl2_gfx
 ### Fedora
 
 ```bash
-sudo dnf install SDL2 SDL2_gnf gcc
+sudo dnf install SDL2 SDL2_gfx gcc
 ```
 
 # How to run examples
