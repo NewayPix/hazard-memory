@@ -10,7 +10,7 @@
 #define BALL_RADIUS 10
 #define BLOCKS 5
 
-#include "GameLoop.hpp"
+#include "Game.hpp"
 #include "InputHandler.hpp"
 #include "collider/ColliderCircle.hpp"
 #include "collider/ColliderRect.hpp"
@@ -142,105 +142,103 @@ struct Block {
     };
 };
 
-class Game: public GameLoop {
-    using GameLoop::GameLoop;
+ColliderScreen screen_collider = ColliderScreen(SCREEN_WIDTH, SCREEN_HEIGHT);
+InputHandler input_handler = InputHandler(input_config);
+Keyboard keyboard = {.left=false, .right=false};
+Ball ball = Ball(Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2));
+Player player = Player();
+std::vector<Block> blocks;
 
-    ColliderScreen screen_collider = ColliderScreen(SCREEN_WIDTH, SCREEN_HEIGHT);
-    InputHandler input_handler = InputHandler(input_config);
-    Keyboard keyboard = {.left=false, .right=false};
-    Ball ball = Ball(Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2));
-    Player player = Player();
-    std::vector<Block> blocks;
 
-    void start() {
-        // initialize blocks
-        set_max_frame_rate(60);
-        ball.velocity = {150, 300};
-        for (int i = 0; i < BLOCKS; ++i) {
-            for (int j = 0; j < SCREEN_WIDTH / BLOCK_SIZE / 2  ; j++) {
-                float x = 2 * j * BLOCK_SIZE;
-                float y = i * BLOCK_SIZE;
-                Block b(Vector2(x, y));
-                b.set_color(i+3);
-                blocks.push_back(b);
-            }
+void start() {
+    ball.velocity = {150, 300};
+    for (int i = 0; i < BLOCKS; ++i) {
+        for (int j = 0; j < SCREEN_WIDTH / BLOCK_SIZE / 2  ; j++) {
+            float x = 2 * j * BLOCK_SIZE;
+            float y = i * BLOCK_SIZE;
+            Block b(Vector2(x, y));
+            b.set_color(i+3);
+            blocks.push_back(b);
+        }
+    }
+}
+
+
+void Game::event() {
+    static SDL_Event e;
+    input_handler.process(e);
+    keyboard.left = input_handler.read("left");
+    keyboard.right = input_handler.read("right");
+    keyboard.run = input_handler.read("run");
+    keyboard.double_size = input_handler.read("double_size");
+    running = !(input_handler.read("quit") || input_handler.read(SDL_QUIT));
+}
+
+void Game::update(float dt) {
+    // update player
+    player.read_keyboard(keyboard);
+    player.update(dt);
+    ball.update(dt);
+
+    auto player_collider = player.current_collider();
+    if (screen_collider.collide(&player_collider)) {
+        player.reset_position();
+    }
+
+    auto ball_collider = ball.current_collider();
+    if (screen_collider.collide(&ball_collider)) {
+        auto &s = screen_collider;
+        ball.reset_position();
+        bool x_collide = s.left.collide(&ball_collider) || s.right.collide(&ball_collider);
+        bool y_collide = s.top.collide(&ball_collider) || s.bottom.collide(&ball_collider);
+        if (y_collide) {
+            ball.velocity.y *= -1;
+        }
+        if (x_collide) {
+            ball.velocity.x *= -1;
+        }
+    } else if (ball_collider.collide(&player_collider)) {
+        // FIXME: set ball position to a safer position that don't collides
+        // anymore with player
+        ball.reset_position();
+        ball.velocity.y *= -1;
+        if (player.direction.x != 0) {
+            ball.velocity.x = abs(ball.velocity.x) * player.direction.x;
         }
     }
 
-    void event() {
-        static SDL_Event e;
-        input_handler.process(e);
-        keyboard.left = input_handler.read("left");
-        keyboard.right = input_handler.read("right");
-        keyboard.run = input_handler.read("run");
-        keyboard.double_size = input_handler.read("double_size");
-        running = !(input_handler.read("quit") || input_handler.read(SDL_QUIT));
-    }
 
-    void update(float dt) {
-        // update player
-        player.read_keyboard(keyboard);
-        player.update(dt);
-        ball.update(dt);
-
-        auto player_collider = player.current_collider();
-        if (screen_collider.collide(&player_collider)) {
-            player.reset_position();
-        }
-
-        auto ball_collider = ball.current_collider();
-        if (screen_collider.collide(&ball_collider)) {
-            auto &s = screen_collider;
-            ball.reset_position();
-            bool x_collide = s.left.collide(&ball_collider) || s.right.collide(&ball_collider);
-            bool y_collide = s.top.collide(&ball_collider) || s.bottom.collide(&ball_collider);
-            if (y_collide) {
-                ball.velocity.y *= -1;
-            }
-            if (x_collide) {
-                ball.velocity.x *= -1;
-            }
-        } else if (ball_collider.collide(&player_collider)) {
-            // FIXME: set ball position to a safer position that don't collides
-            // anymore with player
+    for (auto &b: blocks) {
+        if (b.alive && ball_collider.collide(&b.collider)) {
+            b.alive = false;
             ball.reset_position();
             ball.velocity.y *= -1;
-            if (player.direction.x != 0) {
-                ball.velocity.x = abs(ball.velocity.x) * player.direction.x;
-            }
+            //ball.velocity *= 1.1;
+            break;
         }
+    }
+}
 
+void Game::draw() {
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_RenderClear(renderer);
 
-        for (auto &b: blocks) {
-            if (b.alive && ball_collider.collide(&b.collider)) {
-                b.alive = false;
-                ball.reset_position();
-                ball.velocity.y *= -1;
-                //ball.velocity *= 1.1;
-                break;
-            }
+    player.render(renderer);
+    ball.render(renderer);
+
+    for(auto &b: blocks) {
+        if (b.alive) {
+            b.render(renderer);
         }
     }
 
-    void render() {
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-        SDL_RenderClear(renderer);
-
-        player.render(renderer);
-        ball.render(renderer);
-
-        for(auto &b: blocks) {
-            if (b.alive) {
-                b.render(renderer);
-            }
-        }
-
-        // render everything
-        SDL_RenderPresent(renderer);
-    }
-};
+    // render everything
+    SDL_RenderPresent(renderer);
+}
 
 int main() {
+    start();
     Game game(TITLE, SCREEN_WIDTH, SCREEN_HEIGHT);
+    game.set_max_frame_rate(60);
     return game.run();
 }

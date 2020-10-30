@@ -6,8 +6,8 @@
 #include <SDL2/SDL.h>
 
 #include "math/Vector2.hpp"
-#include "GameLoop.hpp"
 #include "InputHandler.hpp"
+#include "Game.hpp"
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
@@ -68,26 +68,23 @@ struct Player {
 };
 
 
-class Game: public GameLoop {
-private:
-    using GameLoop::GameLoop;
-    struct Player player = {};
-    struct KeyboardState keyboard = {};
-    InputHandler input_handler = InputHandler(input_config);
+struct Player player = {};
+struct KeyboardState keyboard = {};
+InputHandler input_handler = InputHandler(input_config);
 
-    void event() {
-        static SDL_Event e;
-        input_handler.process(e);
-        keyboard.up = input_handler.read("up");
-        keyboard.down = input_handler.read("down");
-        keyboard.left = input_handler.read("left");
-        keyboard.right = input_handler.read("right");
-        keyboard.velocity_up = input_handler.read("velocity_up");
-        keyboard.velocity_down = input_handler.read("velocity_down");
-        running = !(input_handler.read(SDL_QUIT) || input_handler.read("quit"));
-    }
+void Game::event() {
+    static SDL_Event e;
+    input_handler.process(e);
+    keyboard.up = input_handler.read("up");
+    keyboard.down = input_handler.read("down");
+    keyboard.left = input_handler.read("left");
+    keyboard.right = input_handler.read("right");
+    keyboard.velocity_up = input_handler.read("velocity_up");
+    keyboard.velocity_down = input_handler.read("velocity_down");
+    this->running = !(input_handler.read(SDL_QUIT) || input_handler.read("quit"));
+}
 
-    void update(float dt) {
+void Game::update(float dt) {
         if (keyboard.velocity_up) {
             player.velocity += 50;
             input_handler.write("velocity_up", false);
@@ -118,36 +115,30 @@ private:
         player.rect.y = round(player.position.y);
     }
 
-    void render() {
+void Game::draw() {
         // background
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-        SDL_RenderClear(renderer);
+        SDL_SetRenderDrawColor(this->renderer, 255, 255, 255, 255);
+        SDL_RenderClear(this->renderer);
 
         // player
-        SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
-        SDL_RenderFillRect(renderer, &player.rect);
+        SDL_SetRenderDrawColor(this->renderer, 0, 255, 255, 255);
+        SDL_RenderFillRect(this->renderer, &player.rect);
 
         // render everything
-        SDL_RenderPresent(renderer);
-    }
+        SDL_RenderPresent(this->renderer);
+}
 
-    void start() {
-        cout << ":: Game initialization!" << endl;
-        set_max_frame_rate(60);
-        player.position.x = SCREEN_WIDTH / 2;
-        player.position.y = SCREEN_HEIGHT / 2;
-    }
-};
+void start() {
+    cout << ":: Game initialization!" << endl;
+    player.position.x = SCREEN_WIDTH / 2;
+    player.position.y = SCREEN_HEIGHT / 2;
+}
 
 
 int main(void) {
-    try {
-        Game game("Square Moving", SCREEN_WIDTH, SCREEN_HEIGHT);
-        game.run();
-    } catch (string s) {
-        cerr << "[error] " << s << endl;
-        return 1;
-    }
+    start();
+    Game game("Square Moving", SCREEN_WIDTH, SCREEN_HEIGHT);
+    game.set_max_frame_rate(60);
 
-    return 0;
+    return game.run();
 }

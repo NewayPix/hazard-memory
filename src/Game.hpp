@@ -8,27 +8,20 @@
 
 #include "Ticker.hpp"
 
-class GameLoop {
-protected:
-    SDL_Window *window = nullptr;
-    SDL_Renderer *renderer = nullptr;
-    // int renderer_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
-    int renderer_flags = SDL_RENDERER_ACCELERATED;
-    bool running = true;
-    Ticker timer;
-    virtual void event() = 0;
-    virtual void update(float dt) = 0;
-    virtual void render() = 0;
-    virtual void start() {};
-    virtual void stop() {};
+class Game {
 public:
-    int fps_target = 240;
+    int run() {
+        try {
+            loop();
+        } catch (std::string e) {
+            std::cerr << "[error] " << e << std::endl;
+            return 1;
+        }
 
-    void set_max_frame_rate(int fps) {
-        this->fps_target = fps;
+        return 0;
     }
 
-    GameLoop(const char* title, int width, int height) {
+    Game(const char* title, int width, int height) {
         if (SDL_Init(SDL_INIT_VIDEO) < 0) {
             throw std::string("SDL could not initialize: ") + SDL_GetError();
         }
@@ -51,7 +44,7 @@ public:
         }
     }
 
-    ~GameLoop() {
+    ~Game() {
         std::cout << ":: Game being destroyed!" << std::endl;
         SDL_DestroyRenderer(renderer);
         renderer = nullptr;
@@ -61,6 +54,22 @@ public:
 
         SDL_Quit();
     }
+
+    void set_max_frame_rate(int fps) {
+        this->fps_target = fps;
+    }
+
+private:
+    SDL_Window *window = nullptr;
+    SDL_Renderer *renderer = nullptr;
+    // int renderer_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
+    int renderer_flags = SDL_RENDERER_ACCELERATED;
+    bool running = true;
+    Ticker timer;
+    void event();
+    void update(float dt);
+    void draw();
+    int fps_target = 240;
 
     void fps_lock(float dt) {
         if (fps_target > 0) {
@@ -78,22 +87,9 @@ public:
         do {
             event();
             update(dt = timer.dt());
-            render();
+            draw();
             fps_lock(dt);
         } while(running);
-    }
-
-    int run() {
-        try {
-            start();
-            loop();
-            stop();
-        } catch (std::string e) {
-            std::cerr << "[error] " << e << std::endl;
-            return 1;
-        }
-
-        return 0;
     }
 
 };
