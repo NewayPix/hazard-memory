@@ -20,7 +20,7 @@ An experimental game engine for 2D games based in SDL2 written in C++.
 ### Ubuntu
 
 ```bash
-sudo apt install libsdl2-dev libsdl2-gfx-dev  gcc -y 
+sudo apt install libsdl2-dev libsdl2-gfx-dev gcc
 ```
 
 ### Arch Linux
@@ -37,8 +37,16 @@ sudo dnf install SDL2 SDL2_gfx gcc
 
 # How to run examples
 
-```
+Run all examples:
+
+```bash
 make examples
+```
+
+Run a specific example:
+
+```bash
+make examples/collision/square-platform.cpp
 ```
 
 # License
