@@ -1,32 +1,53 @@
 ![test](https://github.com/ryukinix/hazard-memory/workflows/test/badge.svg)
 
 # hazard-memory
-An experimental  SDL2 Platform Game written in C++
+An experimental game engine for 2D games based in SDL2 written in C++. 
 
-# Roadmap
-## Game Engine
+# Requirements
 
-- [ ] Setup basic scaffold.
-- [ ] Implementation of a ECS system.
-- [ ] Implementation of Hero, NPCs, Items and Enemies Entities.
-- [ ] Implementation of Hero, NPCs, Items and Enemies Behaviours.
-- [ ] Implementation of Animation system (Using Quads).
-- [ ] Implementation of GUI basics, made to be easily extensible (Animation is optional).
-- [ ] Implementation of Configuration files system load. (JSON, .INI or a created encrypted file extension)
-- [ ] Implementation of Configuration in-game setup (Resolution scaling, Input configuration: Joystick or Keyboard).
-- [ ] Implementation of Conversation load files and system of control and render flow. (Text could be animated).
-- [ ] Implementation of Tile system. (Including parsing and load files with levels data).
-- [ ] Implementation of Basic collision system.
-- [ ] Implementation of a Battle system.
-- [ ] Implementation of Items bag and usage.
-- [ ] Implementation of Gameplay Load/Save system. (Checkpoint or Save State system).
+- [SDL2]
+- [SDL2_gfx]
+- [g++]
+- [GNU Make]
 
-## Game Design
+[SDL2]: https://www.libsdl.org/download-2.0.php
+[SDL2_gfx]: https://www.ferzkopp.net/Software/SDL2_gfx/Docs/html/index.html
+[g++]: https://gcc.gnu.org/
+[GNU Make]: https://www.gnu.org/software/make/manual/make.html 
 
-- [ ] Define a theme for the world.
-- [ ] Define a main plot.
-- [ ] Draw graphical user interface assets.
-- [ ] Draw assets for the hero, enemies(including bosses), and stages.
-- [ ] Draw assets for items and armor.
-- [ ] Draw assets for the world and dungeons.
-- [ ] Draw a game ending scene.
+## How to install dependencies
+
+### Ubuntu
+
+```bash
+sudo apt install libsdl2-dev libsdl2-gfx-dev gcc
+```
+
+### Arch Linux
+
+```bash
+sudo pacman -Syu gcc sdl2 sdl2_gfx
+```
+
+### Fedora
+
+```bash
+sudo dnf install gcc-c++ SDL2-devel SDL2_gfx-devel
+```
+
+# How to run examples
+
+Run all examples:
+
+```bash
+make examples
+```
+
+Run a specific example:
+
+```bash
+make examples/collision/square-platform.cpp
+```
+
+# License
+MIT
