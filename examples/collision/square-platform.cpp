@@ -1,3 +1,7 @@
+#include <SDL2/SDL_events.h>
+#include <SDL2/SDL_keycode.h>
+#include <SDL2/SDL_rect.h>
+#include <SDL2/SDL_render.h>
 #include <cmath>
 #include <deque>
 #include <iostream>
@@ -10,6 +14,7 @@
 
 #include "Game.hpp"
 #include "InputHandler.hpp"
+#include "collider/Collider.hpp"
 #include "collider/ColliderCircle.hpp"
 #include "collider/ColliderRect.hpp"
 #include "collider/ColliderScreen.hpp"
