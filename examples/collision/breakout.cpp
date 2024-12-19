@@ -1,7 +1,7 @@
-#include <map>
-#include <vector>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL2_gfxPrimitives.h>
+#include <map>
+#include <vector>
 
 #define TITLE "BreakOut"
 #define SCREEN_WIDTH 800
@@ -18,13 +18,11 @@
 #include "gfx/Circle.hpp"
 #include "math/Vector2.hpp"
 
-std::map<const char*, SDL_Keycode> input_config = {
-    {"left", SDLK_LEFT},
-    {"right", SDLK_RIGHT},
-    {"quit", SDLK_ESCAPE},
-    {"double_size", SDLK_SPACE},
-    {"run", SDLK_LSHIFT}
-};
+std::map<const char*, SDL_Keycode> input_config = {{"left", SDLK_LEFT},
+                                                   {"right", SDLK_RIGHT},
+                                                   {"quit", SDLK_ESCAPE},
+                                                   {"double_size", SDLK_SPACE},
+                                                   {"run", SDLK_LSHIFT}};
 
 struct Keyboard {
     bool left;
@@ -32,9 +30,7 @@ struct Keyboard {
     bool run;
     bool double_size;
 
-    bool valid() {
-        return !(left && right);
-    }
+    bool valid() { return !(left && right); }
 };
 
 struct Player {
@@ -43,32 +39,27 @@ struct Player {
     Vector2 direction;
     bool running;
     bool double_size;
-    ColliderRect collider = {(int)(position.x), (int)position.y,
-                             BLOCK_SIZE * 3, BLOCK_SIZE};
+    ColliderRect collider = {(int)(position.x), (int)position.y, BLOCK_SIZE * 3,
+                             BLOCK_SIZE};
 
     void update(float dt) {
         position.x += (this->running + 1) * velocity.x * direction.x * dt;
     }
 
-    void read_keyboard(Keyboard &k) {
-        this->direction.x = k.left? -1: k.right? 1: 0;
+    void read_keyboard(Keyboard& k) {
+        this->direction.x = k.left ? -1 : k.right ? 1 : 0;
         this->double_size = k.double_size;
         this->running = k.run;
     }
 
-    void reset_position() {
-        position.x = collider.polygon.x;
-    }
+    void reset_position() { position.x = collider.polygon.x; }
     ColliderRect current_collider() {
-        return ColliderRect(
-               round(position.x),
-               round(position.y),
-               BLOCK_SIZE * 3 * (this->double_size + 1),
-               BLOCK_SIZE
-            );
+        return ColliderRect(round(position.x), round(position.y),
+                            BLOCK_SIZE * 3 * (this->double_size + 1),
+                            BLOCK_SIZE);
     }
 
-    void render(SDL_Renderer *renderer) {
+    void render(SDL_Renderer* renderer) {
         collider = current_collider();
         SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
         SDL_RenderFillRect(renderer, &collider.polygon);
@@ -82,9 +73,7 @@ struct Ball {
     Vector2 velocity;
     ColliderCircle collider;
 
-    Ball(Vector2 v): collider(v, BALL_RADIUS) {
-        this->position = v;
-    }
+    Ball(Vector2 v) : collider(v, BALL_RADIUS) { this->position = v; }
 
     void update(float dt) {
         position.x += dt * velocity.x;
@@ -100,32 +89,23 @@ struct Ball {
         position.y = collider.center.y;
     }
 
-    void render(SDL_Renderer *renderer) {
+    void render(SDL_Renderer* renderer) {
         collider = current_collider();
-        filledCircleRGBA(renderer,\
-                         collider.center.x, \
-                         collider.center.y, \
-                         collider.circle.radius,
-                         255, 30, 30, 255);
-        circleRGBA(renderer,
-                   collider.center.x,
-                   collider.center.y,
-                   collider.circle.radius,
-                   0, 0, 0, 255);
-
+        filledCircleRGBA(renderer, collider.center.x, collider.center.y,
+                         collider.circle.radius, 255, 30, 30, 255);
+        circleRGBA(renderer, collider.center.x, collider.center.y,
+                   collider.circle.radius, 0, 0, 0, 255);
     };
 };
 
-
 struct Block {
-    ColliderRect collider = ColliderRect(0, 0, 2*BLOCK_SIZE, BLOCK_SIZE);
+    ColliderRect collider = ColliderRect(0, 0, 2 * BLOCK_SIZE, BLOCK_SIZE);
     bool alive = true;
     SDL_Color color = {0, 0, 0, 255};
 
     Block(Vector2 v) {
-        this->collider = ColliderRect(v.x, v.y, 2*BLOCK_SIZE, BLOCK_SIZE);
+        this->collider = ColliderRect(v.x, v.y, 2 * BLOCK_SIZE, BLOCK_SIZE);
     }
-
 
     void set_color(int i) {
         int level = (0x0f | (1 << i));
@@ -134,7 +114,7 @@ struct Block {
         color.b = 0.9 * level;
     }
 
-    void render(SDL_Renderer *renderer) {
+    void render(SDL_Renderer* renderer) {
         SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
         SDL_RenderFillRect(renderer, &collider.polygon);
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
@@ -144,25 +124,23 @@ struct Block {
 
 ColliderScreen screen_collider = ColliderScreen(SCREEN_WIDTH, SCREEN_HEIGHT);
 InputHandler input_handler = InputHandler(input_config);
-Keyboard keyboard = {.left=false, .right=false};
+Keyboard keyboard = {.left = false, .right = false};
 Ball ball = Ball(Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2));
 Player player = Player();
 std::vector<Block> blocks;
 
-
 void start() {
     ball.velocity = {150, 300};
     for (int i = 0; i < BLOCKS; ++i) {
-        for (int j = 0; j < SCREEN_WIDTH / BLOCK_SIZE / 2  ; j++) {
+        for (int j = 0; j < SCREEN_WIDTH / BLOCK_SIZE / 2; j++) {
             float x = 2 * j * BLOCK_SIZE;
             float y = i * BLOCK_SIZE;
             Block b(Vector2(x, y));
-            b.set_color(i+3);
+            b.set_color(i + 3);
             blocks.push_back(b);
         }
     }
 }
-
 
 void Game::event() {
     static SDL_Event e;
@@ -187,10 +165,12 @@ void Game::update(float dt) {
 
     auto ball_collider = ball.current_collider();
     if (screen_collider.collide(&ball_collider)) {
-        auto &s = screen_collider;
+        auto& s = screen_collider;
         ball.reset_position();
-        bool x_collide = s.left.collide(&ball_collider) || s.right.collide(&ball_collider);
-        bool y_collide = s.top.collide(&ball_collider) || s.bottom.collide(&ball_collider);
+        bool x_collide =
+            s.left.collide(&ball_collider) || s.right.collide(&ball_collider);
+        bool y_collide =
+            s.top.collide(&ball_collider) || s.bottom.collide(&ball_collider);
         if (y_collide) {
             ball.velocity.y *= -1;
         }
@@ -207,13 +187,12 @@ void Game::update(float dt) {
         }
     }
 
-
-    for (auto &b: blocks) {
+    for (auto& b : blocks) {
         if (b.alive && ball_collider.collide(&b.collider)) {
             b.alive = false;
             ball.reset_position();
             ball.velocity.y *= -1;
-            //ball.velocity *= 1.1;
+            // ball.velocity *= 1.1;
             break;
         }
     }
@@ -226,7 +205,7 @@ void Game::draw() {
     player.render(renderer);
     ball.render(renderer);
 
-    for(auto &b: blocks) {
+    for (auto& b : blocks) {
         if (b.alive) {
             b.render(renderer);
         }

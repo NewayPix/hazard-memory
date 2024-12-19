@@ -8,9 +8,8 @@
  * @brief control the time: tick and delta-time
  */
 class Ticker {
-public:
-
-    Ticker(): last_tick(tick()) {}
+  public:
+    Ticker() : last_tick(tick()) {}
 
     // tick in microseconds
     uint64_t tick() {
@@ -27,7 +26,7 @@ public:
         return delta;
     }
 
-private:
+  private:
     uint64_t last_tick;
 };
 
