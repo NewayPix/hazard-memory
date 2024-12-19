@@ -2,8 +2,10 @@
 #define COLLIDER_RECT_H
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_rect.h>
 
 #include "collider/Collider.hpp"
+#include "math/Vector2.hpp"
 
 class ColliderRect : public Collider {
 public:

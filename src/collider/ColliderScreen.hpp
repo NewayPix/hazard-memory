@@ -3,6 +3,7 @@
 
 #include "collider/Collider.hpp"
 #include "collider/ColliderRect.hpp"
+#include "math/Vector2.hpp"
 
 /**
  * @brief detects the collision with the screen boundaries

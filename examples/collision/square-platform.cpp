@@ -3,7 +3,6 @@
 #include <string>
 #include <deque>
 #include <vector>
-#include <chrono>
 #include <map>
 
 #include <SDL2/SDL.h>

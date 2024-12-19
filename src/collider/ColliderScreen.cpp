@@ -1,4 +1,6 @@
 #include "collider/ColliderScreen.hpp"
+#include "collider/Collider.hpp"
+#include "math/Vector2.hpp"
 
 
 ColliderScreen::ColliderScreen(int width, int height)

@@ -4,6 +4,10 @@
 #include <string>
 #include <iostream>
 
+#include <SDL2/SDL_error.h>
+#include <SDL2/SDL_render.h>
+#include <SDL2/SDL_timer.h>
+#include <SDL2/SDL_video.h>
 #include <SDL2/SDL.h>
 
 #include "Ticker.hpp"
@@ -25,6 +29,8 @@ public:
         if (SDL_Init(SDL_INIT_VIDEO) < 0) {
             throw std::string("SDL could not initialize: ") + SDL_GetError();
         }
+
+
 
         window = SDL_CreateWindow(title,
                                   SDL_WINDOWPOS_UNDEFINED,

@@ -1,7 +1,10 @@
 #include "collider/ColliderRect.hpp"
+#include "collider/Collider.hpp"
 #include "collider/ColliderCircle.hpp"
 #include "collider/ColliderScreen.hpp"
-#include <vector>
+#include "math/Vector2.hpp"
+#include <SDL2/SDL_rect.h>
+#include <cstdlib>
 
 ColliderRect::ColliderRect(SDL_Rect const &r): ColliderRect(r.x, r.y, r.w, r.h) {}
 

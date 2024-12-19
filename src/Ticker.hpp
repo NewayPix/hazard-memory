@@ -2,6 +2,7 @@
 #define TICKER_HPP
 
 #include <chrono>
+#include <cstdint>
 
 /**
  * @brief control the time: tick and delta-time

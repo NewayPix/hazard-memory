@@ -1,10 +1,10 @@
 #ifndef INPUT_HANDLER_HPP
 #define INPUT_HANDLER_HPP
 
-#include <map>
-#include <vector>
-#include <string>
 
+#include <map>
+
+#include <SDL2/SDL_keycode.h>
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL.h>
 

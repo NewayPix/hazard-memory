@@ -3,6 +3,7 @@
 
 #include "collider/Collider.hpp"
 #include "gfx/Circle.hpp"
+#include "math/Vector2.hpp"
 
 class ColliderCircle : public Collider {
 public:

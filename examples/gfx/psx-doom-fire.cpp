@@ -4,6 +4,12 @@
  *
  *
  */
+#include <SDL2/SDL_events.h>
+#include <SDL2/SDL_keycode.h>
+#include <SDL2/SDL_rect.h>
+#include <SDL2/SDL_render.h>
+#include <array>
+#include <map>
 #include <vector>
 #include <SDL2/SDL.h>
 #include "Game.hpp"

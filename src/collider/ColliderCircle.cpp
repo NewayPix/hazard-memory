@@ -1,5 +1,8 @@
 #include "collider/ColliderCircle.hpp"
+#include "collider/Collider.hpp"
 #include "collider/ColliderRect.hpp"
+#include "gfx/Circle.hpp"
+#include "math/Vector2.hpp"
 #include <vector>
 
 ColliderCircle::ColliderCircle(Circle const &c): ColliderCircle(c.center, c.radius) {}
