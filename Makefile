@@ -1,10 +1,11 @@
 CXX         = g++
 SRC_DIR     = src
-INCLUDES    = $(shell pkg-config --cflags sdl2) -I  $(SRC_DIR)
+INCLUDES    = $(shell pkg-config --cflags sdl2) -I $(SRC_DIR)
 CXXFLAGS    = -w $(INCLUDES) -g -Wall -Wextra -Werror -DDEBUG -std=c++17
 LFLAGS      = -lSDL2 -lm -lSDL2_gfx
 MAIN        = $(SRC_DIR)/main.cpp
 SRCS        = $(shell find $(SRC_DIR) -name "*.cpp" -type f)
+HEADERS     = $(shell find $(SRC_DIR) -name "*.hpp" -type f)
 LIB_SRCS    = $(filter-out $(MAIN), $(SRCS))
 TESTS       = $(wildcard tests/*.cpp)
 EXAMPLES    = $(shell find examples -name "*.cpp" -type f)
@@ -29,6 +30,12 @@ examples/%.cpp: $(LIB_OBJS) FORCE
 
 %.bin: FORCE
 	./$@
+
+format/%:
+	clang-format -i $*
+
+format: $(SRCS)
+	clang-format -i $(SRCS) $(HEADERS) $(EXAMPLES)
 
 examples: $(EXAMPLES)
 
