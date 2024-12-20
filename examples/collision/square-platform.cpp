@@ -28,14 +28,9 @@ using namespace std;
 
 // keys to InputHandler observe
 std::map<const char*, SDL_Keycode> input_config = {
-    { "quit", SDLK_ESCAPE },
-    { "up", SDLK_UP },
-    { "left", SDLK_LEFT },
-    { "right", SDLK_RIGHT },
-    { "down", SDLK_DOWN },
-    { "velocity_up", SDLK_w },
-    { "velocity_down", SDLK_s },
-    { "run", SDLK_LSHIFT },
+    { "quit", SDLK_ESCAPE },     { "up", SDLK_UP },      { "left", SDLK_LEFT },
+    { "right", SDLK_RIGHT },     { "down", SDLK_DOWN },  { "velocity_up", SDLK_w },
+    { "velocity_down", SDLK_s }, { "run", SDLK_LSHIFT },
 };
 
 struct KeyboardState {
@@ -70,8 +65,9 @@ struct Player {
     }
 
     ColliderRect current_collider() {
-        return ColliderRect(round(position.x), round(position.y),
-        collider.polygon.w, collider.polygon.h);
+        return ColliderRect(
+        round(position.x), round(position.y), collider.polygon.w, collider.polygon.h
+        );
     }
 
     /*
@@ -171,7 +167,7 @@ void Game::event() {
     keyboard.velocity_up   = input_handler.read("velocity_up");
     keyboard.velocity_down = input_handler.read("velocity_down");
     keyboard.run           = input_handler.read("run");
-    running = !(input_handler.read(SDL_QUIT) || input_handler.read("quit"));
+    running                = !(input_handler.read(SDL_QUIT) || input_handler.read("quit"));
 }
 
 void debug(float dt) {
@@ -273,8 +269,7 @@ void Game::draw() {
     }
 
     for (auto c : circles) {
-        filledCircleRGBA(
-        this->renderer, c.center.x, c.center.y, c.circle.radius, 0, 0, 0, 255);
+        filledCircleRGBA(this->renderer, c.center.x, c.center.y, c.circle.radius, 0, 0, 0, 255);
     }
 
     // render everything
@@ -290,7 +285,10 @@ void start() {
     int block_size = 50;
     colliders.push_back(&collider_screen);
     SDL_Rect block1 = {
-        .x = 0, .y = SCREEN_HEIGHT - block_size, .w = 2 * block_size, .h = block_size
+        .x = 0,
+        .y = SCREEN_HEIGHT - block_size,
+        .w = 2 * block_size,
+        .h = block_size,
     };
     SDL_Rect block2 = {
         .x = SCREEN_WIDTH / 4,

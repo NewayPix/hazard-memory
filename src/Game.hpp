@@ -30,8 +30,7 @@ class Game {
             throw std::string("SDL could not initialize: ") + SDL_GetError();
         }
 
-        window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED,
-        SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN);
+        window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN);
 
         if (window == nullptr) {
             throw std::string("window could not be created: ") + SDL_GetError();

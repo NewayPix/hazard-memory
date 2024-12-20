@@ -19,12 +19,8 @@ using namespace std;
 
 // keys to InputHandler observe
 std::map<const char*, SDL_Keycode> input_config = {
-    { "quit", SDLK_ESCAPE },
-    { "up", SDLK_UP },
-    { "left", SDLK_LEFT },
-    { "right", SDLK_RIGHT },
-    { "down", SDLK_DOWN },
-    { "velocity_up", SDLK_w },
+    { "quit", SDLK_ESCAPE },     { "up", SDLK_UP },     { "left", SDLK_LEFT },
+    { "right", SDLK_RIGHT },     { "down", SDLK_DOWN }, { "velocity_up", SDLK_w },
     { "velocity_down", SDLK_s },
 };
 
@@ -83,7 +79,7 @@ void Game::event() {
     keyboard.right         = input_handler.read("right");
     keyboard.velocity_up   = input_handler.read("velocity_up");
     keyboard.velocity_down = input_handler.read("velocity_down");
-    this->running = !(input_handler.read(SDL_QUIT) || input_handler.read("quit"));
+    this->running          = !(input_handler.read(SDL_QUIT) || input_handler.read("quit"));
 }
 
 void Game::update(float dt) {

@@ -22,8 +22,12 @@ std::map<const char*, SDL_Keycode> input_config = {
 InputHandler input_handler = InputHandler(input_config);
 float screen_counter       = 0;
 int color_cursor           = 0;
-int colors[4][4] = { { 225, 0, 0, 0 }, { 247, 227, 0, 97 }, { 25, 235, 0, 42 },
-    { 0, 1, 224, 255 } };
+int colors[4][4]           = {
+              { 225, 0, 0, 0 },
+              { 247, 227, 0, 97 },
+              { 25, 235, 0, 42 },
+              { 0, 1, 224, 255 },
+};
 
 void Game::event() {
     static SDL_Event e;

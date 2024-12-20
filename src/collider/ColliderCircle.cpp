@@ -5,8 +5,7 @@
 #include "math/Vector2.hpp"
 #include <vector>
 
-ColliderCircle::ColliderCircle(Circle const& c)
-: ColliderCircle(c.center, c.radius) {
+ColliderCircle::ColliderCircle(Circle const& c) : ColliderCircle(c.center, c.radius) {
 }
 
 ColliderCircle::ColliderCircle(Vector2 center, int radius) {

@@ -6,8 +6,7 @@
 #include <SDL2/SDL_rect.h>
 #include <cstdlib>
 
-ColliderRect::ColliderRect(SDL_Rect const& r)
-: ColliderRect(r.x, r.y, r.w, r.h) {
+ColliderRect::ColliderRect(SDL_Rect const& r) : ColliderRect(r.x, r.y, r.w, r.h) {
 }
 
 ColliderRect::ColliderRect(int x, int y, int w, int h) {

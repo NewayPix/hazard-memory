@@ -26,11 +26,8 @@
 
 // keys to InputHandler observe
 std::map<const char*, SDL_Keycode> input_config = {
-    { "left", SDLK_LEFT },
-    { "right", SDLK_RIGHT },
-    { "quit", SDLK_ESCAPE },
-    { "double_size", SDLK_SPACE },
-    { "run", SDLK_LSHIFT },
+    { "left", SDLK_LEFT },         { "right", SDLK_RIGHT }, { "quit", SDLK_ESCAPE },
+    { "double_size", SDLK_SPACE }, { "run", SDLK_LSHIFT },
 };
 
 struct Keyboard {
@@ -74,8 +71,7 @@ struct Player {
         position.x = collider.polygon.x;
     }
     ColliderRect current_collider() {
-        return ColliderRect(round(position.x), round(position.y),
-        BLOCK_SIZE * 3 * (this->double_size + 1), BLOCK_SIZE);
+        return ColliderRect(round(position.x), round(position.y), BLOCK_SIZE * 3 * (this->double_size + 1), BLOCK_SIZE);
     }
 
     void render(SDL_Renderer* renderer) {
@@ -112,10 +108,8 @@ struct Ball {
 
     void render(SDL_Renderer* renderer) {
         collider = current_collider();
-        filledCircleRGBA(renderer, collider.center.x, collider.center.y,
-        collider.circle.radius, 255, 30, 30, 255);
-        circleRGBA(renderer, collider.center.x, collider.center.y,
-        collider.circle.radius, 0, 0, 0, 255);
+        filledCircleRGBA(renderer, collider.center.x, collider.center.y, collider.circle.radius, 255, 30, 30, 255);
+        circleRGBA(renderer, collider.center.x, collider.center.y, collider.circle.radius, 0, 0, 0, 255);
     };
 };
 
@@ -151,8 +145,7 @@ Keyboard keyboard              = {
                  .run         = false,
                  .double_size = false,
 };
-Ball ball     = Ball(Vector2(static_cast<float>(SCREEN_WIDTH) / 2.0,
-    static_cast<float>(SCREEN_HEIGHT) / 2.0));
+Ball ball = Ball(Vector2(static_cast<float>(SCREEN_WIDTH) / 2.0, static_cast<float>(SCREEN_HEIGHT) / 2.0));
 Player player = Player();
 std::vector<Block> blocks;
 
@@ -176,7 +169,7 @@ void Game::event() {
     keyboard.right       = input_handler.read("right");
     keyboard.run         = input_handler.read("run");
     keyboard.double_size = input_handler.read("double_size");
-    running = !(input_handler.read("quit") || input_handler.read(SDL_QUIT));
+    running              = !(input_handler.read("quit") || input_handler.read(SDL_QUIT));
 }
 
 void Game::update(float dt) {
