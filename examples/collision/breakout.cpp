@@ -24,9 +24,14 @@
 #include "gfx/Circle.hpp"
 #include "math/Vector2.hpp"
 
-std::map<const char*, SDL_Keycode> input_config = { { "left", SDLK_LEFT },
-    { "right", SDLK_RIGHT }, { "quit", SDLK_ESCAPE },
-    { "double_size", SDLK_SPACE }, { "run", SDLK_LSHIFT } };
+// keys to InputHandler observe
+std::map<const char*, SDL_Keycode> input_config = {
+    { "left", SDLK_LEFT },
+    { "right", SDLK_RIGHT },
+    { "quit", SDLK_ESCAPE },
+    { "double_size", SDLK_SPACE },
+    { "run", SDLK_LSHIFT },
+};
 
 struct Keyboard {
     bool left;

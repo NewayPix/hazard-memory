@@ -27,10 +27,16 @@
 using namespace std;
 
 // keys to InputHandler observe
-std::map<const char*, SDL_Keycode> input_config = { { "quit", SDLK_ESCAPE },
-    { "up", SDLK_UP }, { "left", SDLK_LEFT }, { "right", SDLK_RIGHT },
-    { "down", SDLK_DOWN }, { "velocity_up", SDLK_w },
-    { "velocity_down", SDLK_s }, { "run", SDLK_LSHIFT } };
+std::map<const char*, SDL_Keycode> input_config = {
+    { "quit", SDLK_ESCAPE },
+    { "up", SDLK_UP },
+    { "left", SDLK_LEFT },
+    { "right", SDLK_RIGHT },
+    { "down", SDLK_DOWN },
+    { "velocity_up", SDLK_w },
+    { "velocity_down", SDLK_s },
+    { "run", SDLK_LSHIFT },
+};
 
 struct KeyboardState {
     bool up;
