@@ -14,9 +14,9 @@
 
 class Game {
     public:
-    int run () {
+    int run() {
         try {
-            loop ();
+            loop();
         } catch (std::string e) {
             std::cerr << "[error] " << e << std::endl;
             return 1;
@@ -25,36 +25,36 @@ class Game {
         return 0;
     }
 
-    Game (const char* title, int width, int height) {
-        if (SDL_Init (SDL_INIT_VIDEO) < 0) {
-            throw std::string ("SDL could not initialize: ") + SDL_GetError ();
+    Game(const char* title, int width, int height) {
+        if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+            throw std::string("SDL could not initialize: ") + SDL_GetError();
         }
 
-        window = SDL_CreateWindow (title, SDL_WINDOWPOS_UNDEFINED,
+        window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN);
 
         if (window == nullptr) {
-            throw std::string ("window could not be created: ") + SDL_GetError ();
+            throw std::string("window could not be created: ") + SDL_GetError();
         }
 
-        renderer = SDL_CreateRenderer (window, -1, renderer_flags);
+        renderer = SDL_CreateRenderer(window, -1, renderer_flags);
         if (!renderer) {
-            throw std::string ("renderer could not be created: ") + SDL_GetError ();
+            throw std::string("renderer could not be created: ") + SDL_GetError();
         }
     }
 
-    ~Game () {
+    ~Game() {
         std::cout << ":: Game being destroyed!" << std::endl;
-        SDL_DestroyRenderer (renderer);
+        SDL_DestroyRenderer(renderer);
         renderer = nullptr;
 
-        SDL_DestroyWindow (window);
+        SDL_DestroyWindow(window);
         window = nullptr;
 
-        SDL_Quit ();
+        SDL_Quit();
     }
 
-    void set_max_frame_rate (int fps) {
+    void set_max_frame_rate(int fps) {
         this->fps_target = fps;
     }
 
@@ -66,29 +66,29 @@ class Game {
     int renderer_flags = SDL_RENDERER_ACCELERATED;
     bool running       = true;
     Ticker timer;
-    void event ();
-    void update (float dt);
-    void draw ();
+    void event();
+    void update(float dt);
+    void draw();
     int fps_target = 240;
 
-    void fps_lock (float dt) {
+    void fps_lock(float dt) {
         if (fps_target > 0) {
             float ideal_frame_time_ms = 1000.0f / fps_target;
             float frame_time_ms       = 1000 * dt;
             int delay_time            = ideal_frame_time_ms - frame_time_ms;
             if (delay_time > 0) {
-                SDL_Delay (delay_time);
+                SDL_Delay(delay_time);
             }
         }
     }
 
-    void loop () {
+    void loop() {
         float dt;
         do {
-            event ();
-            update (dt = timer.dt ());
-            draw ();
-            fps_lock (dt);
+            event();
+            update(dt = timer.dt());
+            draw();
+            fps_lock(dt);
         } while (running);
     }
 };

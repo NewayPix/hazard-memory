@@ -27,7 +27,7 @@ std::map<const char*, SDL_Keycode> input_config = {
     { "quit", SDLK_ESCAPE },
 };
 
-InputHandler input_handler = InputHandler (input_config);
+InputHandler input_handler = InputHandler(input_config);
 // Game variables
 int widthQuantity  = SCREEN_WIDTH / TILESIZE;
 int heightQuantity = 96;
@@ -45,61 +45,61 @@ std::vector<std::array<int, 3>> colors = { { 0, 0, 0 }, { 31, 7, 7 },
     { 207, 207, 111 }, { 223, 223, 159 }, { 239, 239, 199 }, { 255, 255, 255 } };
 std::vector<int> tiles;
 
-void start () {
+void start() {
     for (int i = 0; i < widthQuantity; i++) {
         for (int j = 0; j < heightQuantity; j++) {
             if (j == (heightQuantity - 1)) {
-                tiles.push_back (35);
+                tiles.push_back(35);
             } else {
-                tiles.push_back (0);
+                tiles.push_back(0);
             }
         }
     }
 }
 
-int getTileValue (int x, int y) {
-    return tiles.at ((x * heightQuantity) + y);
+int getTileValue(int x, int y) {
+    return tiles.at((x * heightQuantity) + y);
 }
 
-double sortNumber () {
-    return (std::rand () / (double)RAND_MAX);
+double sortNumber() {
+    return (std::rand() / (double)RAND_MAX);
 }
 
-void setTileValue (int x, int y, int value) {
-    tiles.at ((x * heightQuantity) + y) = value;
+void setTileValue(int x, int y, int value) {
+    tiles.at((x * heightQuantity) + y) = value;
 }
 
-void Game::event () {
+void Game::event() {
     static SDL_Event e;
-    input_handler.process (e);
-    this->running = !(input_handler.read ("quit") || input_handler.read (SDL_QUIT));
+    input_handler.process(e);
+    this->running = !(input_handler.read("quit") || input_handler.read(SDL_QUIT));
 }
 
-void Game::update (float dt) {
+void Game::update(float dt) {
     for (int i = 1; i < (widthQuantity - 1); i++) {
         for (int j = 1; j < (heightQuantity - 1); j++) {
-            int value         = getTileValue (i, (j + 1));
-            double randNumber = sortNumber ();
-            int coeficient    = value - floor (randNumber * 3);
+            int value         = getTileValue(i, (j + 1));
+            double randNumber = sortNumber();
+            int coeficient    = value - floor(randNumber * 3);
             value             = (coeficient > 0) ? coeficient : 0;
             if (randNumber < 0.4) {
-                setTileValue ((i - 1), j, value);
+                setTileValue((i - 1), j, value);
             } else if (randNumber > 0.4 && randNumber <= 0.8) {
-                setTileValue ((i + 1), j, value);
+                setTileValue((i + 1), j, value);
             } else {
-                setTileValue (i, (j - 1), value);
+                setTileValue(i, (j - 1), value);
             }
         }
     }
 }
 
-void Game::draw () {
+void Game::draw() {
     // Sets a color in a renderer and render on screen
-    SDL_RenderClear (this->renderer);
+    SDL_RenderClear(this->renderer);
     for (int i = 0; i < widthQuantity; i++) {
         for (int j = 0; j < heightQuantity; j++) {
-            int tileEl = getTileValue (i, j);
-            SDL_SetRenderDrawColor (this->renderer, colors[tileEl][0],
+            int tileEl = getTileValue(i, j);
+            SDL_SetRenderDrawColor(this->renderer, colors[tileEl][0],
             colors[tileEl][1], colors[tileEl][2], 255);
             SDL_Rect rectangle;
 
@@ -107,17 +107,17 @@ void Game::draw () {
             rectangle.y = offsetY + (TILESIZE * j);
             rectangle.w = TILESIZE;
             rectangle.h = TILESIZE;
-            SDL_RenderFillRect (this->renderer, &rectangle);
+            SDL_RenderFillRect(this->renderer, &rectangle);
         }
     }
-    SDL_SetRenderDrawColor (this->renderer, 0, 0, 0, 255);
-    SDL_RenderPresent (this->renderer);
+    SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 255);
+    SDL_RenderPresent(this->renderer);
 }
 
-int main (void) {
-    std::srand (std::time (nullptr));
-    start ();
-    Game game ("Doom Fire", SCREEN_WIDTH, SCREEN_HEIGHT);
-    game.set_max_frame_rate (60);
-    return game.run ();
+int main(void) {
+    std::srand(std::time(nullptr));
+    start();
+    Game game("Doom Fire", SCREEN_WIDTH, SCREEN_HEIGHT);
+    game.set_max_frame_rate(60);
+    return game.run();
 }
