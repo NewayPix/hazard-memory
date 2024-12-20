@@ -104,7 +104,8 @@ void Game::event() {
     this->running = !(input_handler.read("quit") || input_handler.read(SDL_QUIT));
 }
 
-void Game::update(float dt) {
+
+void Game::update([[maybe_unused]] float dt) {
     for (int i = 1; i < (widthQuantity - 1); i++) {
         for (int j = 1; j < (heightQuantity - 1); j++) {
             int value         = getTileValue(i, (j + 1));

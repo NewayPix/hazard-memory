@@ -16,7 +16,7 @@ ColliderRect::ColliderRect(int x, int y, int w, int h) {
     polygon.w = w;
     polygon.h = h;
 
-    center = Vector2(x + w / 2, y + h / 2);
+    center = Vector2(static_cast<float>(x + w) / 2, static_cast<float>(y + h) / 2);
 }
 
 bool ColliderRect::on_top(Collider* c) {
@@ -61,5 +61,5 @@ bool ColliderRect::collide(Collider* c) {
 }
 
 Vector2 ColliderRect::radius() {
-    return Vector2(polygon.w / 2, polygon.h / 2);
+    return Vector2(static_cast<float>(polygon.w) / 2, static_cast<float>(polygon.h) / 2);
 }

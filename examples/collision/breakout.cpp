@@ -45,12 +45,20 @@ struct Keyboard {
 };
 
 struct Player {
-    Vector2 position = { SCREEN_WIDTH / 2, SCREEN_HEIGHT - BLOCK_SIZE };
+    Vector2 position = {
+        static_cast<float>(SCREEN_WIDTH) / 2,
+        static_cast<float>(SCREEN_HEIGHT) - BLOCK_SIZE,
+    };
     Vector2 velocity = { 500, 0 };
     Vector2 direction;
     bool running;
     bool double_size;
-    ColliderRect collider = { (int)(position.x), (int)position.y, BLOCK_SIZE * 3, BLOCK_SIZE };
+    ColliderRect collider = {
+        static_cast<int>(position.x),
+        static_cast<int>(position.y),
+        BLOCK_SIZE * 3,
+        BLOCK_SIZE,
+    };
 
     void update(float dt) {
         position.x += (this->running + 1) * velocity.x * direction.x * dt;
@@ -137,8 +145,14 @@ struct Block {
 
 ColliderScreen screen_collider = ColliderScreen(SCREEN_WIDTH, SCREEN_HEIGHT);
 InputHandler input_handler     = InputHandler(input_config);
-Keyboard keyboard              = { .left = false, .right = false };
-Ball ball     = Ball(Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2));
+Keyboard keyboard              = {
+                 .left        = false,
+                 .right       = false,
+                 .run         = false,
+                 .double_size = false,
+};
+Ball ball     = Ball(Vector2(static_cast<float>(SCREEN_WIDTH) / 2.0,
+    static_cast<float>(SCREEN_HEIGHT) / 2.0));
 Player player = Player();
 std::vector<Block> blocks;
 

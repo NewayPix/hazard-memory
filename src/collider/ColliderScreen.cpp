@@ -9,11 +9,11 @@ ColliderScreen::ColliderScreen(int width, int height)
   bottom(0, height, width, 1) { // bottom
     this->width  = width;
     this->height = height;
-    this->center = Vector2(width / 2, height / 2);
+    this->center = Vector2(static_cast<float>(width) / 2, static_cast<float>(height) / 2);
 }
 bool ColliderScreen::collide(Collider* c) {
     return bottom.collide(c) || left.collide(c) || right.collide(c) || top.collide(c);
 }
 Vector2 ColliderScreen::radius() {
-    return Vector2(width / 2, height / 2);
+    return Vector2(static_cast<float>(width) / 2, static_cast<float>(height) / 2);
 }
