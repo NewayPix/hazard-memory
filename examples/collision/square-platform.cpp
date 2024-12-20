@@ -292,26 +292,36 @@ void start() {
     SDL_Rect block1 = {
         .x = 0, .y = SCREEN_HEIGHT - block_size, .w = 2 * block_size, .h = block_size
     };
-    SDL_Rect block2 = { .x = SCREEN_WIDTH / 4,
-        .y                 = SCREEN_HEIGHT - 3 * block_size,
-        .w                 = 2 * block_size,
-        .h                 = block_size };
-    SDL_Rect block3 = { .x = SCREEN_WIDTH / 2,
-        .y                 = SCREEN_HEIGHT - 4 * block_size,
-        .w                 = 2 * block_size,
-        .h                 = block_size };
-    SDL_Rect block4 = { .x = SCREEN_WIDTH / 6,
-        .y                 = SCREEN_HEIGHT - 6 * block_size,
-        .w                 = 2 * block_size,
-        .h                 = block_size };
-    SDL_Rect block5 = { .x = SCREEN_WIDTH / 2,
-        .y                 = SCREEN_HEIGHT - 8 * block_size,
-        .w                 = 2 * block_size,
-        .h                 = block_size };
-    SDL_Rect block6 = { .x = SCREEN_WIDTH - 2 * block_size,
-        .y                 = SCREEN_HEIGHT - 10 * block_size,
-        .w                 = 2 * block_size,
-        .h                 = block_size };
+    SDL_Rect block2 = {
+        .x = SCREEN_WIDTH / 4,
+        .y = SCREEN_HEIGHT - 3 * block_size,
+        .w = 2 * block_size,
+        .h = block_size,
+    };
+    SDL_Rect block3 = {
+        .x = SCREEN_WIDTH / 2,
+        .y = SCREEN_HEIGHT - 4 * block_size,
+        .w = 2 * block_size,
+        .h = block_size,
+    };
+    SDL_Rect block4 = {
+        .x = SCREEN_WIDTH / 6,
+        .y = SCREEN_HEIGHT - 6 * block_size,
+        .w = 2 * block_size,
+        .h = block_size,
+    };
+    SDL_Rect block5 = {
+        .x = SCREEN_WIDTH / 2,
+        .y = SCREEN_HEIGHT - 8 * block_size,
+        .w = 2 * block_size,
+        .h = block_size,
+    };
+    SDL_Rect block6 = {
+        .x = SCREEN_WIDTH - 2 * block_size,
+        .y = SCREEN_HEIGHT - 10 * block_size,
+        .w = 2 * block_size,
+        .h = block_size,
+    };
 
     blocks.push_back(ColliderRect(block1));
     blocks.push_back(ColliderRect(block2));
