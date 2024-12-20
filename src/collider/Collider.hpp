@@ -5,7 +5,7 @@
 #include <cmath>
 
 class Collider {
-  public:
+    public:
     // The center of the collider polygon, it must be calculated at the
     // constructor
     Vector2 center;
@@ -13,16 +13,16 @@ class Collider {
     /**
      * @brief abstract collide method
      */
-    virtual bool collide(Collider* c) = 0;
+    virtual bool collide (Collider* c) = 0;
 
     /**
      * @brief return the object radius
      */
-    virtual Vector2 radius() = 0;
+    virtual Vector2 radius () = 0;
 };
 
 // return the nearest value of c in (min, max) range.
-inline float range(float c, float min, float max) {
+inline float range (float c, float min, float max) {
     if (c < min) {
         return min;
     } else if (c > max) {

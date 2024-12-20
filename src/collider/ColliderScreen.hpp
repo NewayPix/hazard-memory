@@ -9,11 +9,11 @@
  * @brief detects the collision with the screen boundaries
  */
 class ColliderScreen : public Collider {
-  public:
-    ColliderScreen(int width, int height);
+    public:
+    ColliderScreen (int width, int height);
 
-    bool collide(Collider* c);
-    Vector2 radius();
+    bool collide (Collider* c);
+    Vector2 radius ();
 
     int width;
     int height;
