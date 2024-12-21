@@ -71,7 +71,8 @@ struct Player {
         position.x = collider.polygon.x;
     }
     ColliderRect current_collider() {
-        return ColliderRect(round(position.x), round(position.y), BLOCK_SIZE * 3 * (this->double_size + 1), BLOCK_SIZE);
+        return ColliderRect(round(position.x), round(position.y),
+                            BLOCK_SIZE * 3 * (this->double_size + 1), BLOCK_SIZE);
     }
 
     void render(SDL_Renderer* renderer) {
@@ -108,7 +109,8 @@ struct Ball {
 
     void render(SDL_Renderer* renderer) {
         collider = current_collider();
-        filledCircleRGBA(renderer, collider.center.x, collider.center.y, collider.circle.radius, 255, 30, 30, 255);
+        filledCircleRGBA(renderer, collider.center.x, collider.center.y, collider.circle.radius,
+                         255, 30, 30, 255);
         circleRGBA(renderer, collider.center.x, collider.center.y, collider.circle.radius, 0, 0, 0, 255);
     };
 };

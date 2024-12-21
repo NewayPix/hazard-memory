@@ -129,8 +129,8 @@ void Game::draw() {
 
 void start() {
     cout << ":: Game initialization!" << endl;
-    player.position.x = SCREEN_WIDTH / 2;
-    player.position.y = SCREEN_HEIGHT / 2;
+    player.position.x = static_cast<float>(SCREEN_WIDTH) / 2;
+    player.position.y = static_cast<float>(SCREEN_HEIGHT) / 2;
 }
 
 int main(void) {
