@@ -65,8 +65,9 @@ struct Player {
     }
 
     ColliderRect current_collider() {
-        return ColliderRect(round(position.x), round(position.y), collider.polygon.w,
-                            collider.polygon.h);
+        return ColliderRect(
+        round(position.x), round(position.y), collider.polygon.w, collider.polygon.h
+        );
     }
 
     /*

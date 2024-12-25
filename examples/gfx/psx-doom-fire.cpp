@@ -101,8 +101,7 @@ void Game::draw() {
     for (int i = 0; i < widthQuantity; i++) {
         for (int j = 0; j < heightQuantity; j++) {
             int tileEl = getTileValue(i, j);
-            SDL_SetRenderDrawColor(this->renderer, colors[tileEl][0], colors[tileEl][1],
-                                   colors[tileEl][2], 255);
+            SDL_SetRenderDrawColor(this->renderer, colors[tileEl][0], colors[tileEl][1], colors[tileEl][2], 255);
             SDL_Rect rectangle;
 
             rectangle.x = offsetX + (TILESIZE * i);
