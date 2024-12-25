@@ -1,15 +1,19 @@
 #ifndef GAME_LOOP_HPP
 #define GAME_LOOP_HPP
 
-#include <string>
 #include <iostream>
+#include <string>
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_error.h>
+#include <SDL2/SDL_render.h>
+#include <SDL2/SDL_timer.h>
+#include <SDL2/SDL_video.h>
 
 #include "Ticker.hpp"
 
 class Game {
-public:
+    public:
     int run() {
         try {
             loop();
@@ -26,17 +30,11 @@ public:
             throw std::string("SDL could not initialize: ") + SDL_GetError();
         }
 
-        window = SDL_CreateWindow(title,
-                                  SDL_WINDOWPOS_UNDEFINED,
-                                  SDL_WINDOWPOS_UNDEFINED,
-                                  width,
-                                  height,
-                                  SDL_WINDOW_SHOWN);
+        window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN);
 
         if (window == nullptr) {
             throw std::string("window could not be created: ") + SDL_GetError();
         }
-
 
         renderer = SDL_CreateRenderer(window, -1, renderer_flags);
         if (!renderer) {
@@ -59,12 +57,13 @@ public:
         this->fps_target = fps;
     }
 
-private:
-    SDL_Window *window = nullptr;
-    SDL_Renderer *renderer = nullptr;
-    // int renderer_flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
+    private:
+    SDL_Window* window     = nullptr;
+    SDL_Renderer* renderer = nullptr;
+    // int renderer_flags = SDL_RENDERER_ACCELERATED |
+    // SDL_RENDERER_PRESENTVSYNC;
     int renderer_flags = SDL_RENDERER_ACCELERATED;
-    bool running = true;
+    bool running       = true;
     Ticker timer;
     void event();
     void update(float dt);
@@ -73,9 +72,9 @@ private:
 
     void fps_lock(float dt) {
         if (fps_target > 0) {
-            float ideal_frame_time_ms = 1000.0f/fps_target;
-            float frame_time_ms = 1000 * dt;
-            int delay_time = ideal_frame_time_ms - frame_time_ms;
+            float ideal_frame_time_ms = 1000.0f / fps_target;
+            float frame_time_ms       = 1000 * dt;
+            int delay_time            = ideal_frame_time_ms - frame_time_ms;
             if (delay_time > 0) {
                 SDL_Delay(delay_time);
             }
@@ -89,9 +88,8 @@ private:
             update(dt = timer.dt());
             draw();
             fps_lock(dt);
-        } while(running);
+        } while (running);
     }
-
 };
 
 #endif // GAME_LOOP_HPP

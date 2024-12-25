@@ -1,5 +1,4 @@
 #include <cassert>
-#include <string>
 
 #include <SDL2/SDL_rect.h>
 
@@ -38,9 +37,9 @@ int main(void) {
     */
 
 
-    SDL_Rect r1 = {0, 0, 20, 20};
-    SDL_Rect r2 = {0, 20, 20, 20};
-    SDL_Rect r3 = {10, 30, 20, 20};
+    SDL_Rect r1 = { 0, 0, 20, 20 };
+    SDL_Rect r2 = { 0, 20, 20, 20 };
+    SDL_Rect r3 = { 10, 30, 20, 20 };
 
     ColliderRect c1(r1);
     ColliderRect c2(r2);
