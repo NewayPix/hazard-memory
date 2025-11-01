@@ -12,8 +12,8 @@ class ColliderScreen : public Collider {
     public:
     ColliderScreen(int width, int height);
 
-    bool collide(Collider* c);
-    Vector2 radius();
+    bool collide(Collider* c) override;
+    Vector2 radius() override;
 
     int width;
     int height;
@@ -22,5 +22,7 @@ class ColliderScreen : public Collider {
     ColliderRect right;
     ColliderRect bottom;
 };
+
+static_assert(Collidable<ColliderScreen>);
 
 #endif // COLLIDER_SCREEN_HPP

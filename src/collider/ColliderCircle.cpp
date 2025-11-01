@@ -5,34 +5,33 @@
 #include "math/Vector2.hpp"
 #include <vector>
 
-ColliderCircle::ColliderCircle(Circle const& c) : ColliderCircle(c.center, c.radius) {
+ColliderCircle::ColliderCircle(Circle c) : circle(c) {
+    this->center = circle.get_center();
 }
 
-ColliderCircle::ColliderCircle(Vector2 center, int radius) {
-    this->center        = center;
-    this->circle.center = center;
-    this->circle.radius = radius;
+ColliderCircle::ColliderCircle(Vector2 center, int radius) : circle(Circle(center, radius)) {
+    this->center = center;
 }
 
 Vector2 ColliderCircle::radius() {
-    return Vector2(circle.radius, circle.radius);
+    return Vector2(circle.get_radius(), circle.get_radius());
 }
 
 bool ColliderCircle::collide(Collider* c) {
     // special colllision if Collider it's actually ColliderRect
     bool cond = false;
     if (dynamic_cast<ColliderRect*>(c)) {
-        Vector2 ct                      = c->center;
+        Vector2 ct                      = c->get_center();
         Vector2 r                       = c->radius();
         Vector2 max                     = ct + r;
         Vector2 min                     = ct - r;
-        float nearest_x                 = range(this->center.x, min.x, max.x);
-        float nearest_y                 = range(this->center.y, min.y, max.y);
+        float nearest_x                 = range(this->center.get_x(), min.get_x(), max.get_x());
+        float nearest_y                 = range(this->center.get_y(), min.get_y(), max.get_y());
         std::vector<Vector2> boundaries = {
-            Vector2(nearest_x, max.y), // bottom
-            Vector2(nearest_x, min.y), // top
-            Vector2(max.x, nearest_y), // right
-            Vector2(min.x, nearest_y), // left
+            Vector2(nearest_x, max.get_y()), // bottom
+            Vector2(nearest_x, min.get_y()), // top
+            Vector2(max.get_x(), nearest_y), // right
+            Vector2(min.get_x(), nearest_y), // left
         };
         for (auto& boundary : boundaries) {
             float distance = this->center.distance(boundary);
@@ -41,7 +40,7 @@ bool ColliderCircle::collide(Collider* c) {
             }
         }
     } else {
-        float distance   = this->center.distance(c->center);
+        float distance   = this->center.distance(c->get_center());
         float radius_sum = this->radius().max() + c->radius().max();
         cond             = distance < radius_sum;
     }

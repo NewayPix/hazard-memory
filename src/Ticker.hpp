@@ -2,33 +2,35 @@
 #define TICKER_HPP
 
 #include <chrono>
-#include <cstdint>
 
 /**
  * @brief control the time: tick and delta-time
  */
 class Ticker {
-    public:
-    Ticker() : last_tick(tick()) {
-    }
+public:
+    using clock = std::chrono::high_resolution_clock;
 
-    // tick in microseconds
-    uint64_t tick() {
-        using namespace std::chrono;
-        auto now = high_resolution_clock::now();
-        return duration_cast<microseconds>(now.time_since_epoch()).count();
+    Ticker() : last_tick(clock::now()) {}
+
+    // tick
+    clock::time_point tick() {
+        return clock::now();
     }
 
     // delta time in seconds
     float dt() {
-        auto t      = tick();
-        float delta = (t - last_tick) / 1000000.0f;
-        last_tick   = t;
-        return delta;
+        auto t = clock::now();
+        std::chrono::duration<float> delta = t - last_tick;
+        last_tick = t;
+        return delta.count();
     }
 
-    private:
-    uint64_t last_tick;
+    clock::time_point get_last_tick() const {
+        return last_tick;
+    }
+
+private:
+    clock::time_point last_tick;
 };
 
 #endif // TICKER_HPP

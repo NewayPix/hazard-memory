@@ -8,14 +8,17 @@
 class ColliderCircle : public Collider {
     public:
     Circle circle;
-    ColliderCircle(Circle const& c);
-    ColliderCircle(Vector2 center, int radius);
+    ColliderCircle(Circle c);
+    explicit ColliderCircle(Vector2 center, int radius);
 
     /**
      * @brief checks if the current collider is intersecting another one.
      */
-    bool collide(Collider* c);
+    bool collide(Collider* c) override;
 
-    Vector2 radius();
+    Vector2 radius() override;
 };
+
+static_assert(Collidable<ColliderCircle>);
+
 #endif // COLLIDER_RECT_H

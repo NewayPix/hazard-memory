@@ -2,7 +2,11 @@
 #define GAME_LOOP_HPP
 
 #include <iostream>
+#include <memory>
 #include <string>
+#include <string_view>
+#include <thread>
+#include <chrono>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_error.h>
@@ -10,46 +14,54 @@
 #include <SDL2/SDL_timer.h>
 #include <SDL2/SDL_video.h>
 
+#include "Exception.hpp"
 #include "Ticker.hpp"
+
+// Custom deleters for SDL resources
+struct SDLWindowDeleter {
+    void operator()(SDL_Window* window) const {
+        SDL_DestroyWindow(window);
+    }
+};
+
+struct SDLRendererDeleter {
+    void operator()(SDL_Renderer* renderer) const {
+        SDL_DestroyRenderer(renderer);
+    }
+};
 
 class Game {
     public:
     int run() {
         try {
             loop();
-        } catch (std::string e) {
-            std::cerr << "[error] " << e << std::endl;
+        } catch (const Exception& e) {
+            std::cerr << "[error] " << e.what() << std::endl;
             return 1;
         }
 
         return 0;
     }
 
-    Game(const char* title, int width, int height) {
+    Game(std::string_view title, int width, int height) {
         if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-            throw std::string("SDL could not initialize: ") + SDL_GetError();
+            throw Exception("SDL could not initialize: " + std::string(SDL_GetError()));
         }
 
-        window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN);
+        window = std::unique_ptr<SDL_Window, SDLWindowDeleter>(SDL_CreateWindow(title.data(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN));
 
         if (window == nullptr) {
-            throw std::string("window could not be created: ") + SDL_GetError();
+            throw Exception("window could not be created: " + std::string(SDL_GetError()));
         }
 
-        renderer = SDL_CreateRenderer(window, -1, renderer_flags);
+        renderer = std::unique_ptr<SDL_Renderer, SDLRendererDeleter>(SDL_CreateRenderer(window.get(), -1, renderer_flags));
         if (!renderer) {
-            throw std::string("renderer could not be created: ") + SDL_GetError();
+            throw Exception("renderer could not be created: " + std::string(SDL_GetError()));
         }
     }
 
     ~Game() {
         std::cout << ":: Game being destroyed!" << std::endl;
-        SDL_DestroyRenderer(renderer);
-        renderer = nullptr;
-
-        SDL_DestroyWindow(window);
-        window = nullptr;
-
         SDL_Quit();
     }
 
@@ -57,37 +69,35 @@ class Game {
         this->fps_target = fps;
     }
 
-    private:
-    SDL_Window* window     = nullptr;
-    SDL_Renderer* renderer = nullptr;
+    protected:
+    std::unique_ptr<SDL_Window, SDLWindowDeleter> window;
+    std::unique_ptr<SDL_Renderer, SDLRendererDeleter> renderer;
     // int renderer_flags = SDL_RENDERER_ACCELERATED |
     // SDL_RENDERER_PRESENTVSYNC;
     int renderer_flags = SDL_RENDERER_ACCELERATED;
     bool running       = true;
     Ticker timer;
-    void event();
-    void update(float dt);
-    void draw();
+    virtual void event();
+    virtual void update(float dt);
+    virtual void draw();
     int fps_target = 240;
 
-    void fps_lock(float dt) {
+    void fps_lock() {
         if (fps_target > 0) {
-            float ideal_frame_time_ms = 1000.0f / fps_target;
-            float frame_time_ms       = 1000 * dt;
-            int delay_time            = ideal_frame_time_ms - frame_time_ms;
-            if (delay_time > 0) {
-                SDL_Delay(delay_time);
-            }
+            const auto frame_duration = std::chrono::milliseconds(1000) / fps_target;
+            const auto frame_end = timer.get_last_tick() + frame_duration;
+            std::this_thread::sleep_until(frame_end);
         }
     }
 
     void loop() {
         float dt;
         do {
+            dt = timer.dt();
             event();
-            update(dt = timer.dt());
+            update(dt);
             draw();
-            fps_lock(dt);
+            fps_lock();
         } while (running);
     }
 };

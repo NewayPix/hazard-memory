@@ -8,9 +8,6 @@
 
 class Vector2 {
     public:
-    float x;
-    float y;
-
     Vector2() : x(0.0f), y(0.0f) {
     }
     Vector2(float x, float y) : x(x), y(y) {
@@ -72,9 +69,8 @@ class Vector2 {
         return *this;
     }
 
-    bool operator==(const Vector2& u) {
-        return u.x == x && u.y == y;
-    }
+    bool operator==(const Vector2& u) const = default;
+    auto operator<=>(const Vector2& v) const = default;
 
     /*
      * Vector2D with scalar operations
@@ -119,6 +115,16 @@ class Vector2 {
         y += scalar;
         return *this;
     }
+
+    float get_x() const { return x; }
+    float get_y() const { return y; }
+
+    void set_x(float x) { this->x = x; }
+    void set_y(float y) { this->y = y; }
+
+private:
+    float x;
+    float y;
 };
 
 #endif // Vector2

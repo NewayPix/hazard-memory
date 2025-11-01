@@ -5,8 +5,7 @@
 #include <cmath>
 #include <deque>
 #include <iostream>
-#include <map>
-#include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <SDL2/SDL.h>
@@ -27,7 +26,7 @@
 using namespace std;
 
 // keys to InputHandler observe
-std::map<const char*, SDL_Keycode> input_config = {
+std::unordered_map<std::string, SDL_Keycode> input_config = {
     { "quit", SDLK_ESCAPE },     { "up", SDLK_UP },      { "left", SDLK_LEFT },
     { "right", SDLK_RIGHT },     { "down", SDLK_DOWN },  { "velocity_up", SDLK_w },
     { "velocity_down", SDLK_s }, { "run", SDLK_LSHIFT },
@@ -56,17 +55,17 @@ struct Player {
     ColliderRect collider = ColliderRect(0, 0, size, size);
 
     void set_size(int size) {
-        position.x += (this->size - size);
-        position.y += (this->size - size);
+        position.set_x(position.get_x() + (this->size - size));
+        position.set_y(position.get_y() + (this->size - size));
         this->size = size;
 
         // update player's collider
-        collider = ColliderRect(position.x, position.y, size, size);
+        collider = ColliderRect(position.get_x(), position.get_y(), size, size);
     }
 
     ColliderRect current_collider() {
         return ColliderRect(
-        round(position.x), round(position.y), collider.polygon.w, collider.polygon.h
+        round(position.get_x()), round(position.get_y()), collider.polygon.w, collider.polygon.h
         );
     }
 
@@ -99,9 +98,9 @@ struct Player {
     }
 
     void reset_to_last_position() {
-        position.x = collider.polygon.x;
-        position.y = collider.polygon.y;
-        velocity.y = 0;
+        position.set_x(collider.polygon.x);
+        position.set_y(collider.polygon.y);
+        velocity.set_y(0);
     }
 
     void update_rect() {
@@ -109,8 +108,8 @@ struct Player {
     }
 
     void set_direction(struct KeyboardState* k) {
-        direction.x = k->right ? 1 : k->left ? -1 : 0;
-        direction.y = k->up ? 1 : k->down ? -1 : 0;
+        direction.set_x(k->right ? 1 : k->left ? -1 : 0);
+        direction.set_y(k->up ? 1 : k->down ? -1 : 0);
     }
 
     float cos_direction() {
@@ -121,19 +120,19 @@ struct Player {
     float sin_direction() {
         float cos = cos_direction();
         float sin = sqrt(1 - cos * cos);
-        return -direction.y * sin;
+        return -direction.get_y() * sin;
     }
 
     void try_jump(float dt) {
-        if (direction.y == 1) {
-            velocity.y = -100;
-            position.y += velocity.y * dt;
-            direction.y = 0;
+        if (direction.get_y() == 1) {
+            velocity.set_y(-100);
+            position.set_y(position.get_y() + velocity.get_y() * dt);
+            direction.set_y(0);
         }
     }
 
     void move(float dt, Vector2 velocity) {
-        position.x += cos_direction() * velocity.x * dt;
+        position.set_x(position.get_x() + cos_direction() * velocity.get_x() * dt);
         // position.y += sin_direction() * velocity.x * dt;
     }
 
@@ -146,206 +145,666 @@ struct Player {
     }
 };
 
-struct Player player           = {};
-struct KeyboardState keyboard  = {};
-ColliderScreen collider_screen = ColliderScreen(SCREEN_WIDTH, SCREEN_HEIGHT);
-deque<SDL_Rect> squares_shadow;
-vector<ColliderRect> blocks;
-vector<ColliderCircle> circles;
-vector<Collider*> colliders;
-unsigned int squares_max   = 50; /* Max size of squares_shadow container */
-unsigned long frames       = 0;
-InputHandler input_handler = InputHandler(input_config);
+class MyGame : public Game {
 
-void Game::event() {
-    static SDL_Event e;
-    input_handler.process(e);
-    keyboard.up            = input_handler.read("up");
-    keyboard.down          = input_handler.read("down");
-    keyboard.left          = input_handler.read("left");
-    keyboard.right         = input_handler.read("right");
-    keyboard.velocity_up   = input_handler.read("velocity_up");
-    keyboard.velocity_down = input_handler.read("velocity_down");
-    keyboard.run           = input_handler.read("run");
-    running                = !(input_handler.read(SDL_QUIT) || input_handler.read("quit"));
-}
+public:
 
-void debug(float dt) {
-    static float debugTime = 0;
-    if (debugTime > 1) {
-        static unsigned long lastFrames = frames;
-        cout << "--- DEBUG ---" << endl;
-        cout << "Player position: \t" << string(player.position) << endl;
-        cout << "Player velocity: \t" << string(player.velocity) << endl;
-        cout << "            FPS: \t" << frames - lastFrames << endl;
-        cout << "      on ground: \t" << player.on_ground(colliders) << endl;
-        cout << "      collision: \t" << player.collision(colliders) << endl;
-        cout << fixed;
-        cout.precision(7);
-        cout << "             dt: \t" << dt << "s" << endl;
-        cout << endl;
-        lastFrames = frames;
-        debugTime  = 0;
-    }
-    debugTime += dt;
-    frames++;
-}
+    MyGame(std::string_view title, int width, int height) : Game(title, width, height) {
 
-void Game::update(float dt) {
-    // velocity change
-    if (keyboard.velocity_up) {
-        player.velocity.x += 50;
-        player.set_size(player.size + 10);
-        input_handler.write("velocity_up", false);
+        start();
+
     }
 
-    if (keyboard.velocity_down) {
-        player.velocity.x -= 50;
-        if (player.velocity.x <= 50)
-            player.velocity.x = 50;
-        player.set_size(player.size - 10);
-        if (player.size <= 10)
-            player.set_size(10);
-        input_handler.write("velocity_down", false);
-    }
-    // gravity velocity
-    if (player.on_ground(colliders)) {
-        player.velocity.y = 0;
-        player.try_jump(dt);
-    } else {
-        player.velocity.y += 15 * G * dt;
-        player.position.y += 4 * player.velocity.y * dt;
+
+
+    void event() override {
+
+        static SDL_Event e;
+
+        input_handler.process(e);
+
+        keyboard.up            = input_handler.read("up");
+
+        keyboard.down          = input_handler.read("down");
+
+        keyboard.left          = input_handler.read("left");
+
+        keyboard.right         = input_handler.read("right");
+
+        keyboard.velocity_up   = input_handler.read("velocity_up");
+
+        keyboard.velocity_down = input_handler.read("velocity_down");
+
+        keyboard.run           = input_handler.read("run");
+
+        running                = !(input_handler.read(SDL_QUIT) || input_handler.read("quit"));
+
     }
 
-    // collision detection
-    if (player.collision(colliders)) {
-        player.reset_to_last_position();
-    } else {
-        // player movement
-        Vector2 copy_position(player.position);
-        if (keyboard.valid_move()) {
-            player.set_direction(&keyboard);
-            player.move(dt, keyboard.run);
+
+
+    void update(float dt) override {
+
+
+
+            // velocity change
+
+
+
+            if (keyboard.velocity_up) {
+
+
+
+                player.velocity.set_x(player.velocity.get_x() + 50);
+
+
+
+                player.set_size(player.size + 10);
+
+
+
+                input_handler.write("velocity_up", false);
+
+
+
+            }
+
+
+
+    
+
+
+
+            if (keyboard.velocity_down) {
+
+
+
+                player.velocity.set_x(player.velocity.get_x() - 50);
+
+
+
+                if (player.velocity.get_x() <= 50)
+
+
+
+                    player.velocity.set_x(50);
+
+
+
+                player.set_size(player.size - 10);
+
+
+
+                if (player.size <= 10)
+
+
+
+                    player.set_size(10);
+
+
+
+                input_handler.write("velocity_down", false);
+
+
+
+            }
+
+
+
+            // gravity velocity
+
+
+
+            if (player.on_ground(colliders)) {
+
+
+
+                player.velocity.set_y(0);
+
+
+
+                player.try_jump(dt);
+
+
+
+            } else {
+
+
+
+                player.velocity.set_y(player.velocity.get_y() + 15 * G * dt);
+
+
+
+                player.position.set_y(player.position.get_y() + 4 * player.velocity.get_y() * dt);
+
+
+
+            }
+
+
+
+    
+
+
+
+            // collision detection
+
+
+
+            if (player.collision(colliders)) {
+
+
+
+                player.reset_to_last_position();
+
+
+
+            } else {
+
+
+
+                // player movement
+
+
+
+                Vector2 copy_position(player.position);
+
+
+
+                if (keyboard.valid_move()) {
+
+
+
+                    player.set_direction(&keyboard);
+
+
+
+                    player.move(dt, keyboard.run);
+
+
+
+                }
+
+
+
+                if (player.collision(colliders)) {
+
+
+
+                    player.position = copy_position;
+
+
+
+                }
+
+
+
+    
+
+
+
+                // valid state
+
+
+
+                player.update_rect();
+
+
+
+            }
+
+
+
+    
+
+
+
+            static float shadow_interval = 0;
+
+
+
+            if (shadow_interval <= 0) {
+
+
+
+                shadow_interval = 0.005;
+
+
+
+                if (squares_shadow.size() > squares_max) {
+
+
+
+                    squares_shadow.pop_front();
+
+
+
+                } else {
+
+
+
+                    squares_shadow.push_back(player.collider.polygon);
+
+
+
+                }
+
+
+
+            }
+
+
+
+    
+
+
+
+            shadow_interval -= dt;
+
+
+
+            debug(dt);
+
+
+
         }
-        if (player.collision(colliders)) {
-            player.position = copy_position;
+
+
+
+    
+
+
+
+        void draw() override {
+
+
+
+            // background
+
+
+
+            SDL_SetRenderDrawColor(this->renderer.get(), 255, 255, 255, 255);
+
+
+
+            SDL_RenderClear(this->renderer.get());
+
+
+
+    
+
+
+
+            // player
+
+
+
+            int size = squares_shadow.size();
+
+
+
+            for (int i = 0; i < size; ++i) {
+
+
+
+                int factor = round(255 * ((float)(i + 1) / size));
+
+
+
+                SDL_SetRenderDrawColor(this->renderer.get(), 0, factor, 255, 255);
+
+
+
+                SDL_RenderFillRect(this->renderer.get(), &squares_shadow[i]);
+
+
+
+            }
+
+
+
+    
+
+
+
+            // platform blocks
+
+
+
+            for (auto b : blocks) {
+
+
+
+                SDL_SetRenderDrawColor(this->renderer.get(), 0, 0, 0, 255);
+
+
+
+                SDL_RenderDrawRect(this->renderer.get(), &b.polygon);
+
+
+
+            }
+
+
+
+    
+
+
+
+            for (auto c : circles) {
+
+
+
+                filledCircleRGBA(this->renderer.get(), c.circle.get_center().get_x(), c.circle.get_center().get_y(), c.circle.get_radius(), 0, 0, 0, 255);
+
+
+
+            }
+
+
+
+    
+
+
+
+            // render everything
+
+
+
+            SDL_RenderPresent(this->renderer.get());
+
+
+
         }
 
-        // valid state
-        player.update_rect();
-    }
 
-    static float shadow_interval = 0;
-    if (shadow_interval <= 0) {
-        shadow_interval = 0.005;
-        if (squares_shadow.size() > squares_max) {
-            squares_shadow.pop_front();
-        } else {
-            squares_shadow.push_back(player.collider.polygon);
+
+    
+
+
+
+    private:
+
+
+
+        Player player;
+
+
+
+        KeyboardState keyboard;
+
+
+
+        ColliderScreen collider_screen = ColliderScreen(SCREEN_WIDTH, SCREEN_HEIGHT);
+
+
+
+        deque<SDL_Rect> squares_shadow;
+
+
+
+        vector<ColliderRect> blocks;
+
+
+
+        vector<ColliderCircle> circles;
+
+
+
+        vector<Collider*> colliders;
+
+
+
+        unsigned int squares_max   = 50; /* Max size of squares_shadow container */
+
+
+
+        unsigned long frames       = 0;
+
+
+
+        InputHandler input_handler = InputHandler(input_config);
+
+
+
+    
+
+
+
+        void debug(float dt) {
+
+
+
+            static float debugTime = 0;
+
+
+
+            if (debugTime > 1) {
+
+
+
+                static unsigned long lastFrames = frames;
+
+
+
+                cout << "--- DEBUG ---" << endl;
+
+
+
+                cout << "Player position: \t" << string(player.position) << endl;
+
+
+
+                cout << "Player velocity: \t" << string(player.velocity) << endl;
+
+
+
+                cout << "            FPS: \t" << frames - lastFrames << endl;
+
+
+
+                cout << "      on ground: \t" << player.on_ground(colliders) << endl;
+
+
+
+                cout << "      collision: \t" << player.collision(colliders) << endl;
+
+
+
+                cout << fixed;
+
+
+
+                cout.precision(7);
+
+
+
+                cout << "             dt: \t" << dt << "s" << endl;
+
+
+
+                cout << endl;
+
+
+
+                lastFrames = frames;
+
+
+
+                debugTime  = 0;
+
+
+
+            }
+
+
+
+            debugTime += dt;
+
+
+
+            frames++;
+
+
+
         }
+
+
+
+    
+
+
+
+        void start() {
+
+
+
+            cout << ":: Game initialization!" << endl;
+
+
+
+            player.position.set_x(static_cast<float>(SCREEN_WIDTH) / 2);
+
+
+
+            player.position.set_y(static_cast<float>(SCREEN_HEIGHT) - player.size);
+
+
+
+            player.update_rect();
+
+
+
+        int block_size = 50;
+
+        colliders.push_back(&collider_screen);
+
+        SDL_Rect block1 = {
+
+            .x = 0,
+
+            .y = SCREEN_HEIGHT - block_size,
+
+            .w = 2 * block_size,
+
+            .h = block_size,
+
+        };
+
+        SDL_Rect block2 = {
+
+            .x = SCREEN_WIDTH / 4,
+
+            .y = SCREEN_HEIGHT - 3 * block_size,
+
+            .w = 2 * block_size,
+
+            .h = block_size,
+
+        };
+
+        SDL_Rect block3 = {
+
+            .x = SCREEN_WIDTH / 2,
+
+            .y = SCREEN_HEIGHT - 4 * block_size,
+
+            .w = 2 * block_size,
+
+            .h = block_size,
+
+        };
+
+        SDL_Rect block4 = {
+
+            .x = SCREEN_WIDTH / 6,
+
+            .y = SCREEN_HEIGHT - 6 * block_size,
+
+            .w = 2 * block_size,
+
+            .h = block_size,
+
+        };
+
+        SDL_Rect block5 = {
+
+            .x = SCREEN_WIDTH / 2,
+
+            .y = SCREEN_HEIGHT - 8 * block_size,
+
+            .w = 2 * block_size,
+
+            .h = block_size,
+
+        };
+
+        SDL_Rect block6 = {
+
+            .x = SCREEN_WIDTH - 2 * block_size,
+
+            .y = SCREEN_HEIGHT - 10 * block_size,
+
+            .w = 2 * block_size,
+
+            .h = block_size,
+
+        };
+
+
+
+        blocks.push_back(ColliderRect(block1));
+
+        blocks.push_back(ColliderRect(block2));
+
+        blocks.push_back(ColliderRect(block3));
+
+        blocks.push_back(ColliderRect(block4));
+
+        blocks.push_back(ColliderRect(block5));
+
+        blocks.push_back(ColliderRect(block6));
+
+
+
+        float radius = 50;
+
+        circles.push_back(ColliderCircle(Circle(Vector2(200, 150), radius)));
+
+        circles.push_back(ColliderCircle(Circle(Vector2(600, 350), radius)));
+
+
+
+        for (auto& b : blocks) {
+
+            colliders.push_back(&b);
+
+        }
+
+
+
+        for (auto& c : circles) {
+
+            colliders.push_back(&c);
+
+        }
+
+        blocks.push_back(ColliderRect(200 - radius, 150 - radius, radius * 2, radius * 2));
+
+        blocks.push_back(ColliderRect(600 - radius, 350 - radius, radius * 2, radius * 2));
+
     }
 
-    shadow_interval -= dt;
-    debug(dt);
-}
+};
 
-void Game::draw() {
-    // background
-    SDL_SetRenderDrawColor(this->renderer, 255, 255, 255, 255);
-    SDL_RenderClear(this->renderer);
 
-    // player
-    int size = squares_shadow.size();
-    for (int i = 0; i < size; ++i) {
-        int factor = round(255 * ((float)(i + 1) / size));
-        SDL_SetRenderDrawColor(this->renderer, 0, factor, 255, 255);
-        SDL_RenderFillRect(this->renderer, &squares_shadow[i]);
-    }
-
-    // platform blocks
-    for (auto b : blocks) {
-        SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 255);
-        SDL_RenderDrawRect(this->renderer, &b.polygon);
-    }
-
-    for (auto c : circles) {
-        filledCircleRGBA(this->renderer, c.center.x, c.center.y, c.circle.radius, 0, 0, 0, 255);
-    }
-
-    // render everything
-    SDL_RenderPresent(this->renderer);
-}
-
-void start() {
-    cout << ":: Game initialization!" << endl;
-    player.position.x = static_cast<float>(SCREEN_WIDTH) / 2;
-    player.position.y = static_cast<float>(SCREEN_HEIGHT) - player.size;
-    player.update_rect();
-
-    int block_size = 50;
-    colliders.push_back(&collider_screen);
-    SDL_Rect block1 = {
-        .x = 0,
-        .y = SCREEN_HEIGHT - block_size,
-        .w = 2 * block_size,
-        .h = block_size,
-    };
-    SDL_Rect block2 = {
-        .x = SCREEN_WIDTH / 4,
-        .y = SCREEN_HEIGHT - 3 * block_size,
-        .w = 2 * block_size,
-        .h = block_size,
-    };
-    SDL_Rect block3 = {
-        .x = SCREEN_WIDTH / 2,
-        .y = SCREEN_HEIGHT - 4 * block_size,
-        .w = 2 * block_size,
-        .h = block_size,
-    };
-    SDL_Rect block4 = {
-        .x = SCREEN_WIDTH / 6,
-        .y = SCREEN_HEIGHT - 6 * block_size,
-        .w = 2 * block_size,
-        .h = block_size,
-    };
-    SDL_Rect block5 = {
-        .x = SCREEN_WIDTH / 2,
-        .y = SCREEN_HEIGHT - 8 * block_size,
-        .w = 2 * block_size,
-        .h = block_size,
-    };
-    SDL_Rect block6 = {
-        .x = SCREEN_WIDTH - 2 * block_size,
-        .y = SCREEN_HEIGHT - 10 * block_size,
-        .w = 2 * block_size,
-        .h = block_size,
-    };
-
-    blocks.push_back(ColliderRect(block1));
-    blocks.push_back(ColliderRect(block2));
-    blocks.push_back(ColliderRect(block3));
-    blocks.push_back(ColliderRect(block4));
-    blocks.push_back(ColliderRect(block5));
-    blocks.push_back(ColliderRect(block6));
-
-    float radius = 50;
-    circles.push_back(ColliderCircle(Vector2(200, 150), radius));
-    circles.push_back(ColliderCircle(Vector2(600, 350), radius));
-
-    for (auto& b : blocks) {
-        colliders.push_back(&b);
-    }
-
-    for (auto& c : circles) {
-        colliders.push_back(&c);
-    }
-    blocks.push_back(ColliderRect(200 - radius, 150 - radius, radius * 2, radius * 2));
-    blocks.push_back(ColliderRect(600 - radius, 350 - radius, radius * 2, radius * 2));
-}
 
 int main(void) {
-    start();
-    Game game("Square Platform", SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    MyGame game("Square Platform", SCREEN_WIDTH, SCREEN_HEIGHT);
+
     game.set_max_frame_rate(120);
+
     return game.run();
+
 }

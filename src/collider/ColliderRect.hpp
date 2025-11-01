@@ -16,13 +16,16 @@ class ColliderRect : public Collider {
     /**
      * @brief checks if the current collider is intersecting another one.
      */
-    bool collide(Collider* c);
+    bool collide(Collider* c) override;
 
     /**
      * @brief checks if the current collide is on top of another one
      */
     bool on_top(Collider* c);
 
-    Vector2 radius();
+    Vector2 radius() override;
 };
+
+static_assert(Collidable<ColliderRect>);
+
 #endif // COLLIDER_RECT_H

@@ -1,16 +1,19 @@
 #ifndef INPUT_HANDLER_HPP
 #define INPUT_HANDLER_HPP
 
-#include <map>
+#include <unordered_map>
+#include <string>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_keycode.h>
 
 class InputHandler {
-    public:
-    InputHandler(std::map<const char*, SDL_Keycode> input_config) {
-        this->input_config = input_config;
+public:
+    InputHandler(std::unordered_map<std::string, SDL_Keycode> input_config) : input_config(input_config) {
+        for (const auto& [key, value] : input_config) {
+            input_state[value] = false;
+        }
     };
 
     /*
@@ -19,21 +22,11 @@ class InputHandler {
     void process(SDL_Event& e) {
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) {
-                this->input_state[SDL_QUIT] = true;
+                input_state[SDL_QUIT] = true;
             }
-            for (auto& input : input_state) {
-                auto k = input.first;
-                switch (e.type) {
-                case SDL_KEYDOWN:
-                    if (e.key.keysym.sym == k) {
-                        this->input_state[k] = true;
-                    }
-                    break;
-                case SDL_KEYUP:
-                    if (e.key.keysym.sym == k) {
-                        this->input_state[k] = false;
-                    }
-                    break;
+            if (e.type == SDL_KEYDOWN || e.type == SDL_KEYUP) {
+                if (input_state.count(e.key.keysym.sym)) {
+                    input_state[e.key.keysym.sym] = (e.type == SDL_KEYDOWN);
                 }
             }
         }
@@ -46,8 +39,8 @@ class InputHandler {
         return input_state[input_key];
     }
 
-    bool read(const char* alias) {
-        return read(input_config[alias]);
+    bool read(const std::string& alias) {
+        return read(input_config.at(alias));
     }
 
     /*
@@ -57,13 +50,13 @@ class InputHandler {
         input_state[input_key] = state;
     }
 
-    void write(const char* alias, bool state) {
-        write(input_config[alias], state);
+    void write(const std::string& alias, bool state) {
+        write(input_config.at(alias), state);
     }
 
-    private:
-    std::map<SDL_Keycode, bool> input_state;
-    std::map<const char*, SDL_Keycode> input_config;
+private:
+    std::unordered_map<SDL_Keycode, bool> input_state;
+    std::unordered_map<std::string, SDL_Keycode> input_config;
 };
 
 #endif // INPUT_HANDLER_HPP

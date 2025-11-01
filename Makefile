@@ -1,12 +1,12 @@
 CXX         = g++
 SRC_DIR     = src
 INCLUDES    = $(shell pkg-config --cflags sdl2) -I $(SRC_DIR)
-CXXFLAGS    = -w $(INCLUDES) -g -Wall -Wextra -Werror -DDEBUG -std=c++17
+CXXFLAGS    = -w $(INCLUDES) -g -Wall -Wextra -Werror -DDEBUG -std=c++20
 LFLAGS      = -lSDL2 -lm -lSDL2_gfx
 MAIN        = $(SRC_DIR)/main.cpp
-SRCS        = $(shell find $(SRC_DIR) -name "*.cpp" -type f)
+SRCS        = $(filter-out src/Game.cpp, $(shell find $(SRC_DIR) -name "*.cpp" -type f))
 HEADERS     = $(shell find $(SRC_DIR) -name "*.hpp" -type f)
-LIB_SRCS    = $(filter-out $(MAIN), $(SRCS))
+LIB_SRCS    = $(filter-out $(MAIN), $(SRCS)) src/Game.cpp
 TESTS       = $(wildcard tests/*.cpp)
 EXAMPLES    = $(shell find examples -name "*.cpp" -type f)
 RUN_EXAMPLE = 1
