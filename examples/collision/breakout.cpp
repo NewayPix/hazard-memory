@@ -108,8 +108,14 @@ struct Ball {
 
     void render(SDL_Renderer* renderer) {
         collider = current_collider();
-        filledCircleRGBA(renderer, collider.circle.get_center().get_x(), collider.circle.get_center().get_y(), collider.circle.get_radius(), 255, 30, 30, 255);
-        circleRGBA(renderer, collider.circle.get_center().get_x(), collider.circle.get_center().get_y(), collider.circle.get_radius(), 0, 0, 0, 255);
+        filledCircleRGBA(
+        renderer, collider.circle.get_center().get_x(), collider.circle.get_center().get_y(),
+        collider.circle.get_radius(), 255, 30, 30, 255
+        );
+        circleRGBA(
+        renderer, collider.circle.get_center().get_x(), collider.circle.get_center().get_y(),
+        collider.circle.get_radius(), 0, 0, 0, 255
+        );
     };
 };
 
@@ -138,7 +144,7 @@ struct Block {
 };
 
 class MyGame : public Game {
-public:
+    public:
     MyGame(std::string_view title, int width, int height) : Game(title, width, height) {
         start();
     }
@@ -214,7 +220,7 @@ public:
         SDL_RenderPresent(renderer.get());
     }
 
-private:
+    private:
     ColliderScreen screen_collider = ColliderScreen(SCREEN_WIDTH, SCREEN_HEIGHT);
     InputHandler input_handler     = InputHandler(input_config);
     Keyboard keyboard              = {
@@ -223,7 +229,8 @@ private:
                      .run         = false,
                      .double_size = false,
     };
-    Ball ball = Ball(Vector2(static_cast<float>(SCREEN_WIDTH) / 2.0, static_cast<float>(SCREEN_HEIGHT) / 2.0));
+    Ball ball =
+    Ball(Vector2(static_cast<float>(SCREEN_WIDTH) / 2.0, static_cast<float>(SCREEN_HEIGHT) / 2.0));
     Player player = Player();
     std::vector<Block> blocks;
 

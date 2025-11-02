@@ -4,7 +4,8 @@
 #include <SDL2/SDL_render.h>
 #include <cmath>
 #include <deque>
-#include <iostream>
+#include <format>
+#include <print>
 #include <unordered_map>
 #include <vector>
 
@@ -147,14 +148,11 @@ struct Player {
 
 class MyGame : public Game {
 
-public:
-
+    public:
     MyGame(std::string_view title, int width, int height) : Game(title, width, height) {
 
         start();
-
     }
-
 
 
     void event() override {
@@ -164,515 +162,288 @@ public:
         input_handler.process(e);
 
         keyboard.up            = input_handler.read("up");
-
         keyboard.down          = input_handler.read("down");
-
         keyboard.left          = input_handler.read("left");
-
         keyboard.right         = input_handler.read("right");
-
         keyboard.velocity_up   = input_handler.read("velocity_up");
-
         keyboard.velocity_down = input_handler.read("velocity_down");
-
         keyboard.run           = input_handler.read("run");
 
-        running                = !(input_handler.read(SDL_QUIT) || input_handler.read("quit"));
-
+        running = !(input_handler.read(SDL_QUIT) || input_handler.read("quit"));
     }
-
 
 
     void update(float dt) override {
 
 
-
-            // velocity change
-
+        // velocity change
 
 
-            if (keyboard.velocity_up) {
+        if (keyboard.velocity_up) {
 
 
-
-                player.velocity.set_x(player.velocity.get_x() + 50);
-
-
-
-                player.set_size(player.size + 10);
+            player.velocity.set_x(player.velocity.get_x() + 50);
+            player.set_size(player.size + 10);
+            input_handler.write("velocity_up", false);
+        }
 
 
+        if (keyboard.velocity_down) {
+            player.velocity.set_x(player.velocity.get_x() - 50);
+            if (player.velocity.get_x() <= 50)
+                player.velocity.set_x(50);
 
-                input_handler.write("velocity_up", false);
+
+            player.set_size(player.size - 10);
 
 
+            if (player.size <= 10)
 
+
+                player.set_size(10);
+
+
+            input_handler.write("velocity_down", false);
+        }
+
+
+        // gravity velocity
+
+
+        if (player.on_ground(colliders)) {
+
+
+            player.velocity.set_y(0);
+
+
+            player.try_jump(dt);
+
+
+        } else {
+
+
+            player.velocity.set_y(player.velocity.get_y() + 15 * G * dt);
+
+
+            player.position.set_y(player.position.get_y() + 4 * player.velocity.get_y() * dt);
+        }
+
+
+        // collision detection
+
+
+        if (player.collision(colliders)) {
+
+
+            player.reset_to_last_position();
+
+
+        } else {
+
+
+            // player movement
+
+
+            Vector2 copy_position(player.position);
+
+
+            if (keyboard.valid_move()) {
+
+
+                player.set_direction(&keyboard);
+
+
+                player.move(dt, keyboard.run);
             }
-
-
-
-    
-
-
-
-            if (keyboard.velocity_down) {
-
-
-
-                player.velocity.set_x(player.velocity.get_x() - 50);
-
-
-
-                if (player.velocity.get_x() <= 50)
-
-
-
-                    player.velocity.set_x(50);
-
-
-
-                player.set_size(player.size - 10);
-
-
-
-                if (player.size <= 10)
-
-
-
-                    player.set_size(10);
-
-
-
-                input_handler.write("velocity_down", false);
-
-
-
-            }
-
-
-
-            // gravity velocity
-
-
-
-            if (player.on_ground(colliders)) {
-
-
-
-                player.velocity.set_y(0);
-
-
-
-                player.try_jump(dt);
-
-
-
-            } else {
-
-
-
-                player.velocity.set_y(player.velocity.get_y() + 15 * G * dt);
-
-
-
-                player.position.set_y(player.position.get_y() + 4 * player.velocity.get_y() * dt);
-
-
-
-            }
-
-
-
-    
-
-
-
-            // collision detection
-
 
 
             if (player.collision(colliders)) {
 
 
+                player.position = copy_position;
+            }
 
-                player.reset_to_last_position();
 
+            // valid state
+
+
+            player.update_rect();
+        }
+
+
+        static float shadow_interval = 0;
+
+
+        if (shadow_interval <= 0) {
+
+
+            shadow_interval = 0.005;
+
+
+            if (squares_shadow.size() > squares_max) {
+
+
+                squares_shadow.pop_front();
 
 
             } else {
 
 
-
-                // player movement
-
-
-
-                Vector2 copy_position(player.position);
-
-
-
-                if (keyboard.valid_move()) {
-
-
-
-                    player.set_direction(&keyboard);
-
-
-
-                    player.move(dt, keyboard.run);
-
-
-
-                }
-
-
-
-                if (player.collision(colliders)) {
-
-
-
-                    player.position = copy_position;
-
-
-
-                }
-
-
-
-    
-
-
-
-                // valid state
-
-
-
-                player.update_rect();
-
-
-
+                squares_shadow.push_back(player.collider.polygon);
             }
-
-
-
-    
-
-
-
-            static float shadow_interval = 0;
-
-
-
-            if (shadow_interval <= 0) {
-
-
-
-                shadow_interval = 0.005;
-
-
-
-                if (squares_shadow.size() > squares_max) {
-
-
-
-                    squares_shadow.pop_front();
-
-
-
-                } else {
-
-
-
-                    squares_shadow.push_back(player.collider.polygon);
-
-
-
-                }
-
-
-
-            }
-
-
-
-    
-
-
-
-            shadow_interval -= dt;
-
-
-
-            debug(dt);
-
-
-
         }
 
 
+        shadow_interval -= dt;
 
-    
 
+        debug(dt);
+    }
 
 
-        void draw() override {
+    void draw() override {
 
 
+        // background
 
-            // background
 
+        SDL_SetRenderDrawColor(this->renderer.get(), 255, 255, 255, 255);
 
 
-            SDL_SetRenderDrawColor(this->renderer.get(), 255, 255, 255, 255);
+        SDL_RenderClear(this->renderer.get());
 
 
+        // player
 
-            SDL_RenderClear(this->renderer.get());
 
+        int size = squares_shadow.size();
 
 
-    
+        for (int i = 0; i < size; ++i) {
 
 
+            int factor = round(255 * ((float)(i + 1) / size));
 
-            // player
 
+            SDL_SetRenderDrawColor(this->renderer.get(), 0, factor, 255, 255);
 
 
-            int size = squares_shadow.size();
-
-
-
-            for (int i = 0; i < size; ++i) {
-
-
-
-                int factor = round(255 * ((float)(i + 1) / size));
-
-
-
-                SDL_SetRenderDrawColor(this->renderer.get(), 0, factor, 255, 255);
-
-
-
-                SDL_RenderFillRect(this->renderer.get(), &squares_shadow[i]);
-
-
-
-            }
-
-
-
-    
-
-
-
-            // platform blocks
-
-
-
-            for (auto b : blocks) {
-
-
-
-                SDL_SetRenderDrawColor(this->renderer.get(), 0, 0, 0, 255);
-
-
-
-                SDL_RenderDrawRect(this->renderer.get(), &b.polygon);
-
-
-
-            }
-
-
-
-    
-
-
-
-            for (auto c : circles) {
-
-
-
-                filledCircleRGBA(this->renderer.get(), c.circle.get_center().get_x(), c.circle.get_center().get_y(), c.circle.get_radius(), 0, 0, 0, 255);
-
-
-
-            }
-
-
-
-    
-
-
-
-            // render everything
-
-
-
-            SDL_RenderPresent(this->renderer.get());
-
-
-
+            SDL_RenderFillRect(this->renderer.get(), &squares_shadow[i]);
         }
 
 
+        // platform blocks
 
-    
 
+        for (auto b : blocks) {
+
+
+            SDL_SetRenderDrawColor(this->renderer.get(), 0, 0, 0, 255);
+
+
+            SDL_RenderDrawRect(this->renderer.get(), &b.polygon);
+        }
+
+
+        for (auto c : circles) {
+
+
+            filledCircleRGBA(
+            this->renderer.get(), c.circle.get_center().get_x(), c.circle.get_center().get_y(),
+            c.circle.get_radius(), 0, 0, 0, 255
+            );
+        }
+
+
+        // render everything
+
+
+        SDL_RenderPresent(this->renderer.get());
+    }
 
 
     private:
+    Player player;
 
 
+    KeyboardState keyboard;
 
-        Player player;
 
+    ColliderScreen collider_screen = ColliderScreen(SCREEN_WIDTH, SCREEN_HEIGHT);
 
 
-        KeyboardState keyboard;
+    deque<SDL_Rect> squares_shadow;
 
 
+    vector<ColliderRect> blocks;
 
-        ColliderScreen collider_screen = ColliderScreen(SCREEN_WIDTH, SCREEN_HEIGHT);
 
+    vector<ColliderCircle> circles;
 
 
-        deque<SDL_Rect> squares_shadow;
+    vector<Collider*> colliders;
 
 
+    unsigned int squares_max = 50; /* Max size of squares_shadow container */
 
-        vector<ColliderRect> blocks;
 
+    unsigned long frames = 0;
 
 
-        vector<ColliderCircle> circles;
+    InputHandler input_handler = InputHandler(input_config);
 
 
+    void debug(float dt) {
 
-        vector<Collider*> colliders;
 
+        static float debugTime = 0;
 
 
-        unsigned int squares_max   = 50; /* Max size of squares_shadow container */
+        if (debugTime > 1) {
 
 
+            static unsigned long lastFrames = frames;
 
-        unsigned long frames       = 0;
 
+            std::print("--- DEBUG ---\n");
+            std::print("Player position: \t{}\n", std::string(player.position));
+            std::print("Player velocity: \t{}\n", std::string(player.velocity));
+            std::print("            FPS: \t{}\n", frames - lastFrames);
+            std::print("      on ground: \t{}\n", player.on_ground(colliders));
+            std::print("      collision: \t{}\n", player.collision(colliders));
+            std::print("             dt: \t{:.7f}s\n", dt);
 
 
-        InputHandler input_handler = InputHandler(input_config);
+            std::print("\n");
 
 
+            lastFrames = frames;
 
-    
 
-
-
-        void debug(float dt) {
-
-
-
-            static float debugTime = 0;
-
-
-
-            if (debugTime > 1) {
-
-
-
-                static unsigned long lastFrames = frames;
-
-
-
-                cout << "--- DEBUG ---" << endl;
-
-
-
-                cout << "Player position: \t" << string(player.position) << endl;
-
-
-
-                cout << "Player velocity: \t" << string(player.velocity) << endl;
-
-
-
-                cout << "            FPS: \t" << frames - lastFrames << endl;
-
-
-
-                cout << "      on ground: \t" << player.on_ground(colliders) << endl;
-
-
-
-                cout << "      collision: \t" << player.collision(colliders) << endl;
-
-
-
-                cout << fixed;
-
-
-
-                cout.precision(7);
-
-
-
-                cout << "             dt: \t" << dt << "s" << endl;
-
-
-
-                cout << endl;
-
-
-
-                lastFrames = frames;
-
-
-
-                debugTime  = 0;
-
-
-
-            }
-
-
-
-            debugTime += dt;
-
-
-
-            frames++;
-
-
-
+            debugTime = 0;
         }
 
 
-
-    
-
+        debugTime += dt;
 
 
-        void start() {
+        frames++;
+    }
 
 
-
-            cout << ":: Game initialization!" << endl;
-
+    void start() {
 
 
-            player.position.set_x(static_cast<float>(SCREEN_WIDTH) / 2);
+        std::print(":: Game initialization!\n");
 
 
-
-            player.position.set_y(static_cast<float>(SCREEN_HEIGHT) - player.size);
-
+        player.position.set_x(static_cast<float>(SCREEN_WIDTH) / 2);
 
 
-            player.update_rect();
+        player.position.set_y(static_cast<float>(SCREEN_HEIGHT) - player.size);
 
+
+        player.update_rect();
 
 
         int block_size = 50;
@@ -752,7 +523,6 @@ public:
         };
 
 
-
         blocks.push_back(ColliderRect(block1));
 
         blocks.push_back(ColliderRect(block2));
@@ -766,7 +536,6 @@ public:
         blocks.push_back(ColliderRect(block6));
 
 
-
         float radius = 50;
 
         circles.push_back(ColliderCircle(Circle(Vector2(200, 150), radius)));
@@ -774,29 +543,22 @@ public:
         circles.push_back(ColliderCircle(Circle(Vector2(600, 350), radius)));
 
 
-
         for (auto& b : blocks) {
 
             colliders.push_back(&b);
-
         }
-
 
 
         for (auto& c : circles) {
 
             colliders.push_back(&c);
-
         }
 
         blocks.push_back(ColliderRect(200 - radius, 150 - radius, radius * 2, radius * 2));
 
         blocks.push_back(ColliderRect(600 - radius, 350 - radius, radius * 2, radius * 2));
-
     }
-
 };
-
 
 
 int main(void) {
@@ -806,5 +568,4 @@ int main(void) {
     game.set_max_frame_rate(120);
 
     return game.run();
-
 }

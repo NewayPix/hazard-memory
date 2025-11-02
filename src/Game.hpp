@@ -1,12 +1,12 @@
 #ifndef GAME_LOOP_HPP
 #define GAME_LOOP_HPP
 
+#include <chrono>
 #include <iostream>
 #include <memory>
 #include <string>
 #include <string_view>
 #include <thread>
-#include <chrono>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_error.h>
@@ -48,13 +48,16 @@ class Game {
             throw Exception("SDL could not initialize: " + std::string(SDL_GetError()));
         }
 
-        window = std::unique_ptr<SDL_Window, SDLWindowDeleter>(SDL_CreateWindow(title.data(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN));
+        window = std::unique_ptr<SDL_Window, SDLWindowDeleter>(
+        SDL_CreateWindow(title.data(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN)
+        );
 
         if (window == nullptr) {
             throw Exception("window could not be created: " + std::string(SDL_GetError()));
         }
 
-        renderer = std::unique_ptr<SDL_Renderer, SDLRendererDeleter>(SDL_CreateRenderer(window.get(), -1, renderer_flags));
+        renderer =
+        std::unique_ptr<SDL_Renderer, SDLRendererDeleter>(SDL_CreateRenderer(window.get(), -1, renderer_flags));
         if (!renderer) {
             throw Exception("renderer could not be created: " + std::string(SDL_GetError()));
         }
@@ -85,7 +88,7 @@ class Game {
     void fps_lock() {
         if (fps_target > 0) {
             const auto frame_duration = std::chrono::milliseconds(1000) / fps_target;
-            const auto frame_end = timer.get_last_tick() + frame_duration;
+            const auto frame_end      = timer.get_last_tick() + frame_duration;
             std::this_thread::sleep_until(frame_end);
         }
     }

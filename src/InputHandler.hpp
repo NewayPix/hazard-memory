@@ -1,16 +1,17 @@
 #ifndef INPUT_HANDLER_HPP
 #define INPUT_HANDLER_HPP
 
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_keycode.h>
 
 class InputHandler {
-public:
-    InputHandler(std::unordered_map<std::string, SDL_Keycode> input_config) : input_config(input_config) {
+    public:
+    InputHandler(std::unordered_map<std::string, SDL_Keycode> input_config)
+    : input_config(input_config) {
         for (const auto& [key, value] : input_config) {
             input_state[value] = false;
         }
@@ -54,7 +55,7 @@ public:
         write(input_config.at(alias), state);
     }
 
-private:
+    private:
     std::unordered_map<SDL_Keycode, bool> input_state;
     std::unordered_map<std::string, SDL_Keycode> input_config;
 };

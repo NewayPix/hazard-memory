@@ -1,7 +1,7 @@
 CXX         = g++
 SRC_DIR     = src
 INCLUDES    = $(shell pkg-config --cflags sdl2) -I $(SRC_DIR)
-CXXFLAGS    = -w $(INCLUDES) -g -Wall -Wextra -Werror -DDEBUG -std=c++20
+CXXFLAGS    = -w $(INCLUDES) -g -Wall -Wextra -Werror -DDEBUG -std=c++23
 LFLAGS      = -lSDL2 -lm -lSDL2_gfx
 MAIN        = $(SRC_DIR)/main.cpp
 SRCS        = $(filter-out src/Game.cpp, $(shell find $(SRC_DIR) -name "*.cpp" -type f))

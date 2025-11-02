@@ -4,13 +4,18 @@
 #include "math/Vector2.hpp"
 
 class Circle {
-public:
-    explicit Circle(Vector2 center, int radius) : center(center), radius(radius) {}
+    public:
+    explicit Circle(Vector2 center, int radius) : center(center), radius(radius) {
+    }
 
-    Vector2 get_center() const { return center; }
-    int get_radius() const { return radius; }
+    Vector2 get_center() const {
+        return center;
+    }
+    int get_radius() const {
+        return radius;
+    }
 
-private:
+    private:
     Vector2 center;
     int radius;
 };

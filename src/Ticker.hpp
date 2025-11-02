@@ -7,10 +7,11 @@
  * @brief control the time: tick and delta-time
  */
 class Ticker {
-public:
+    public:
     using clock = std::chrono::high_resolution_clock;
 
-    Ticker() : last_tick(clock::now()) {}
+    Ticker() : last_tick(clock::now()) {
+    }
 
     // tick
     clock::time_point tick() {
@@ -19,9 +20,9 @@ public:
 
     // delta time in seconds
     float dt() {
-        auto t = clock::now();
+        auto t                             = clock::now();
         std::chrono::duration<float> delta = t - last_tick;
-        last_tick = t;
+        last_tick                          = t;
         return delta.count();
     }
 
@@ -29,7 +30,7 @@ public:
         return last_tick;
     }
 
-private:
+    private:
     clock::time_point last_tick;
 };
 

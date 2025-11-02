@@ -3,7 +3,7 @@
 #include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_render.h>
 #include <cmath>
-#include <iostream>
+#include <print>
 #include <unordered_map>
 
 #include <SDL2/SDL.h>
@@ -67,7 +67,7 @@ struct Player {
 };
 
 class MyGame : public Game {
-public:
+    public:
     MyGame(std::string_view title, int width, int height) : Game(title, width, height) {
         start();
     }
@@ -129,13 +129,13 @@ public:
         SDL_RenderPresent(this->renderer.get());
     }
 
-private:
-    Player player          = {};
-    KeyboardState keyboard = {};
+    private:
+    Player player              = {};
+    KeyboardState keyboard     = {};
     InputHandler input_handler = InputHandler(input_config);
 
     void start() {
-        cout << ":: Game initialization!" << endl;
+        std::print(":: Game initialization!\n");
         player.position.set_x(static_cast<float>(SCREEN_WIDTH) / 2);
         player.position.set_y(static_cast<float>(SCREEN_HEIGHT) / 2);
     }

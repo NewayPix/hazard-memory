@@ -3,7 +3,7 @@
 
 #include <algorithm>
 #include <cmath>
-#include <sstream>
+#include <format>
 #include <string>
 
 class Vector2 {
@@ -14,9 +14,7 @@ class Vector2 {
     }
 
     operator std::string() const {
-        std::stringstream s;
-        s << "<" << x << ", " << y << ">";
-        return s.str();
+        return std::format("<{}, {}>", x, y);
     }
 
     /*
@@ -69,7 +67,7 @@ class Vector2 {
         return *this;
     }
 
-    bool operator==(const Vector2& u) const = default;
+    bool operator==(const Vector2& u) const  = default;
     auto operator<=>(const Vector2& v) const = default;
 
     /*
@@ -116,13 +114,21 @@ class Vector2 {
         return *this;
     }
 
-    float get_x() const { return x; }
-    float get_y() const { return y; }
+    float get_x() const {
+        return x;
+    }
+    float get_y() const {
+        return y;
+    }
 
-    void set_x(float x) { this->x = x; }
-    void set_y(float y) { this->y = y; }
+    void set_x(float x) {
+        this->x = x;
+    }
+    void set_y(float y) {
+        this->y = y;
+    }
 
-private:
+    private:
     float x;
     float y;
 };

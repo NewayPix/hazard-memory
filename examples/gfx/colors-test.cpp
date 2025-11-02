@@ -26,8 +26,9 @@ std::unordered_map<std::string, SDL_Keycode> input_config = {
 InputHandler input_handler = InputHandler(input_config);
 
 class MyGame : public Game {
-public:
-    MyGame(std::string_view title, int width, int height) : Game(title, width, height) {}
+    public:
+    MyGame(std::string_view title, int width, int height) : Game(title, width, height) {
+    }
 
     void event() override {
         static SDL_Event e;
@@ -39,7 +40,7 @@ public:
         static float time = 0;
         if (time > 0.1) {
             color_idx = (color_idx + 1) % (sizeof(colors) / sizeof(colors[0]));
-            time = 0;
+            time      = 0;
         }
         time += dt;
     }
@@ -52,13 +53,13 @@ public:
         SDL_RenderPresent(this->renderer.get());
     }
 
-private:
-    int color_idx = 0;
-    int colors[4][4]           = {
-              { 225, 0, 0, 0 },
-              { 247, 227, 0, 97 },
-              { 25, 235, 0, 42 },
-              { 0, 1, 224, 255 },
+    private:
+    int color_idx    = 0;
+    int colors[4][4] = {
+        { 225, 0, 0, 0 },
+        { 247, 227, 0, 97 },
+        { 25, 235, 0, 42 },
+        { 0, 1, 224, 255 },
     };
 };
 
